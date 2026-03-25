@@ -17,11 +17,16 @@ This is the complete solution for the lesson-03 exercise.
 
 Diagrams are pre-rendered SVGs in the `diagrams/` folder. Source `.mmd` files are included for reference or modification.
 
-To re-render after editing a source file:
+**Rendering Diagrams:**
+The `@mermaid-js/mermaid-cli` package is installed at the project root. To re-render after editing a source file, run from the project root:
 ```bash
-mmdc -i diagrams/<name>.mmd -o diagrams/<name>.svg
+npx mmdc -i lesson-03-agentic-architecture/exercise/solution/diagrams/<name>.mmd -o lesson-03-agentic-architecture/exercise/solution/diagrams/<name>.svg
 ```
-> `mmdc` is available in the Vocareum workspace. For local use: `npm install -g @mermaid-js/mermaid-cli`
+
+Example - render the multi-agent diagram:
+```bash
+npx mmdc -i lesson-03-agentic-architecture/exercise/solution/diagrams/multi-agent.mmd -o lesson-03-agentic-architecture/exercise/solution/diagrams/multi-agent.svg
+```
 
 1. **System Architecture Diagram** (`diagrams/multi-agent.mmd`)
    - Shows all agents and their relationships
