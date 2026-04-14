@@ -73,7 +73,6 @@ export async function summarizeDocument(filePath: string): Promise<DocumentSumma
       throw new Error(`Agent SDK error: ${(message.errors || []).join('\n')}`);
     }
 
-
     // Parse the response into structured format
     const keyPointsMatch = rawResult.match(/## Key Points\n([\s\S]*?)(?=## Summary|$)/);
     const summaryMatch = rawResult.match(/## Summary\n([\s\S]*?)$/);

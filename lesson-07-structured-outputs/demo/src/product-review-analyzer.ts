@@ -69,7 +69,6 @@ Extract:
 - summary: A brief 1-2 sentence summary
 - recommendsPurchase: Would the reviewer recommend buying?`;
 
-
   try {
     for await (const message of query({
       prompt,
@@ -82,7 +81,6 @@ Extract:
         },
       },
     })) {
-
       if (message.type === 'result') {
         if (message.subtype === 'success' && message.structured_output) {
           // Use the validated output

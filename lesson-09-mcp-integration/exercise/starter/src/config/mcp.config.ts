@@ -18,7 +18,7 @@ export interface McpServerConfig {
   env?: Record<string, string | undefined>;
 }
 
-// TODO 1: Configure the ESLint MCP server
+// TODO: Step 1 - Configure the ESLint MCP server
 // The server should use:
 // - type: "stdio"
 // - command: "npx"
@@ -28,12 +28,12 @@ export const mcpServersConfig: Record<string, McpServerConfig> = {
     // TODO: Fill in the MCP server configuration
     type: "stdio",
     command: "", // TODO: What command runs the ESLint MCP server?
-    args: [], // TODO: What args install and run @eslint/mcp@latest?
+    args: [], // TODO: What arguments install and run @eslint/mcp@latest?
     env: {},
   },
 };
 
-// TODO 2: Define the ESLint MCP tools
+// TODO: Step 2 - Define the ESLint MCP tools
 // Tool naming convention: mcp__<server-name>__<tool-name>
 // The ESLint MCP server provides a "lint" tool
 export const eslintTools = [

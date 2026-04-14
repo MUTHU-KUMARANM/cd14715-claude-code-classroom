@@ -1,17 +1,15 @@
 # Exercise: Claude Agent SDK - Contract Standardizer
 
-Build an agent to standardize vendor contracts for legal review.
-
 ## Objective
 
 Implement `standardizeContract()` in `src/contract-standardizer.ts` using the Claude Agent SDK. The agent reads a contract file, extracts key terms, and writes a standardized output file.
 
 ## Learning Goals
 
-- Use `query()` from the Claude Agent SDK
-- Pass `allowedTools: ["Read", "Write"]` to let the agent read and write files
+- Use `query()` from the Claude Agent SDK with `allowedTools: ["Read", "Write"]`
 - Iterate over `query()` results to extract the agent's raw output
-- Handle errors from the agent
+- Handle successful results vs. error messages from the agent
+- Wrap agent calls in try/catch for proper error handling
 
 ## Project Structure
 
@@ -23,6 +21,7 @@ src/
 │   ├── vendor.txt
 │   └── email.txt
 ├── standardized/            # Output (agent writes here)
+│   └── .gitkeep
 ├── contract-standardizer.ts # YOUR IMPLEMENTATION (has TODOs)
 ├── sample-contracts.ts      # Contract file paths
 └── index.ts                 # Test runner (do not modify)
@@ -31,7 +30,6 @@ src/
 ## Setup
 
 ```bash
-# From repo root (shared node_modules)
 npm install
 ```
 
@@ -42,7 +40,7 @@ Copy `.env.example` to `.env` (required in all environments):
 cp .env.example .env
 ```
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment -- the `.env` file only needs to provide `ANTHROPIC_MODEL`.
 
 For local development, also uncomment and fill in your credentials in `.env`:
 ```
@@ -51,8 +49,8 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
 **Troubleshooting:**
-- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+- **`Error: ANTHROPIC_MODEL is not set`** -- make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** -- in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
 ## Your Tasks
 
@@ -101,18 +99,7 @@ npm start
 
 ## Success Criteria
 
-- [ ] All 4 contracts are processed without errors
+- [ ] All contracts are processed without errors
 - [ ] Standardized files appear in `src/standardized/`
 - [ ] Each output follows the standardized format (Parties, Term, Financial Terms, etc.)
 - [ ] `raw` field is populated in the returned object
-
-## Agent Tools
-
-| Tool | Purpose |
-|------|---------|
-| Read | Read contract files from `contracts/` folder |
-| Write | Write standardized output to `standardized/` folder |
-
-## Key Takeaway
-
-The Claude Agent SDK handles the tool execution loop automatically. You call `query()` with `allowedTools`, iterate the results, and the agent reads and writes files on its own.

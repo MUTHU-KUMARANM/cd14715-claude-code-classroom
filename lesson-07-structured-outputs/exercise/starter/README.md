@@ -1,7 +1,5 @@
 # Exercise: Structured Outputs - Meeting Notes Analyzer
 
-Extract structured data from meeting transcripts using Zod schemas.
-
 ## Objective
 
 Complete `src/meeting-analyzer.ts` to implement `analyzeMeeting()`, which uses the Claude Agent SDK with structured outputs to extract action items, decisions, and participants from meeting transcripts.
@@ -16,10 +14,14 @@ Complete `src/meeting-analyzer.ts` to implement `analyzeMeeting()`, which uses t
 ## Project Structure
 
 ```
-src/
-├── meeting-analyzer.ts   # YOUR IMPLEMENTATION (has TODOs)
-├── sample-transcripts.ts # Test transcripts
-└── index.ts              # Test runner (do not modify)
+starter/
+├── src/
+│   ├── index.ts              # Test runner (do not modify)
+│   ├── meeting-analyzer.ts   # Your implementation (has TODOs)
+│   └── sample-transcripts.ts # Test transcripts
+├── .env.example
+├── package.json
+└── README.md
 ```
 
 ## Setup
@@ -52,7 +54,7 @@ ANTHROPIC_BASE_URL=your-base-url-here
 
 Complete the TODOs in `src/meeting-analyzer.ts`:
 
-### TODO 1–3: Add `.describe()` to schema fields
+### TODO 1-3: Add `.describe()` to schema fields
 
 The schemas are already defined but the fields are missing `.describe()` calls. Add descriptions to each field so the LLM knows what to extract:
 
@@ -70,7 +72,7 @@ Do this for all fields in `ActionItemSchema`, `DecisionSchema`, and `MeetingAnal
 
 `MeetingAnalysisJSONSchema` is already set up with `zodToJsonSchema()` — just verify it uses `{ $refStrategy: "root" }` to flatten nested schemas.
 
-### TODO 6: Add `outputFormat` to `query()`
+### TODO 5: Add `outputFormat` to `query()`
 
 Inside the `query()` call, add the `outputFormat` option:
 
@@ -81,7 +83,7 @@ outputFormat: {
 },
 ```
 
-### TODO 7: Return the structured output
+### TODO 6: Return the structured output
 
 When the result message arrives, validate and return it:
 
@@ -107,11 +109,3 @@ npm start
 - [ ] `actionItems` have `task`, `assignee`, `dueDate`, and `priority` fields
 - [ ] `decisions` have `decision`, `rationale`, and `impact` fields
 - [ ] No "Failed to get structured output" error thrown
-
-## Key Concept
-
-The `.describe()` calls on Zod fields are crucial — they become part of the JSON Schema and guide the LLM on what to extract for each field.
-
-## Key Takeaway
-
-Structured outputs with Zod schemas ensure predictable, validated data extraction. Use `zodToJsonSchema()` to convert Zod schemas for the `outputFormat` option in `query()`.

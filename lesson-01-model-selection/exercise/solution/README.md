@@ -1,18 +1,13 @@
-# Exercise: Claude Model Selection
+# Solution: Claude Model Selection - Support Ticket Classifier
 
-Practice selecting Haiku, Sonnet, and Opus based on task complexity.
-
-## Scenario
-
-A support team handles thousands of tickets daily:
-- Simple questions → fast, cheap processing
-- Complex issues → deeper analysis
+Complete implementation of a support ticket classification system that routes requests to different Claude models based on complexity.
 
 ## Project Structure
 
 ```
 src/
-├── index.ts          # Main exercise (4 steps)
+├── classifier.ts     # Main solution (4 steps implemented)
+├── helpers.ts        # Utility functions (cost, stats, comparison)
 ├── models.ts         # Model definitions & pricing
 └── sample-tickets.ts # Test data
 ```
@@ -20,18 +15,19 @@ src/
 ## Setup
 
 ```bash
-# From repo root (shared node_modules)
 npm install
 ```
 
 ## Authentication Setup
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment.
-
-For local development, copy `.env.example` to `.env` and uncomment your credentials:
+Copy `.env.example` to `.env` (required in all environments):
 ```bash
 cp .env.example .env
 ```
+
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment.
+
+For local development, also uncomment and fill in your credentials in `.env`.
 
 **Troubleshooting:**
 - **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
@@ -47,9 +43,9 @@ npm start
 
 | Step | Model | Task |
 |------|-------|------|
-| 1 | Haiku | Simple classification |
-| 2 | Sonnet | Detailed analysis |
-| 3 | Opus | Complex reasoning |
+| 1 | Haiku | Simple priority classification |
+| 2 | Sonnet | Detailed ticket analysis |
+| 3 | Opus | Complex multi-issue reasoning |
 | 4 | All | Side-by-side comparison |
 
 ## Key Takeaway
@@ -61,4 +57,3 @@ npm start
 | Opus | Complex, multi-step reasoning | Highest |
 
 Smart model routing can reduce costs by 80%+!
-

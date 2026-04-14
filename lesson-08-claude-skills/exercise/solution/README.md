@@ -1,15 +1,9 @@
-# Exercise: Claude Skills - JavaScript Code Reviewer
-
-Build an agent that reviews JavaScript files using a Claude Skill.
-
-## Scenario
-
-Your team needs consistent code reviews across projects. Build an agent that uses a JavaScript code review skill to analyze files for quality issues, bugs, and security vulnerabilities.
+# Solution: Claude Skills - JavaScript Code Reviewer
 
 ## Project Structure
 
 ```
-exercise/
+solution/
 ├── .claude/
 │   └── skills/
 │       └── js-code-review/
@@ -19,7 +13,7 @@ exercise/
 │   │   ├── clean.js            # Well-written code
 │   │   └── issues.js           # Code with problems
 │   ├── js-reviewer.ts          # Exported function (deliverable)
-│   └── index.ts                # Test
+│   └── index.ts                # Test harness
 └── README.md
 ```
 
@@ -56,44 +50,12 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: js-reviewer.ts
+## What You'll See
 
-```typescript
-export interface CodeReviewResult {
-  filename: string;
-  raw: string;
-}
-
-export async function reviewJavaScriptFile(
-  filePath: string
-): Promise<CodeReviewResult>
-```
-
-## Key Pattern: Using Skills with Agent SDK
-
-```typescript
-for await (const message of query({
-  prompt: "Review this JavaScript file...",
-  options: {
-    cwd: PROJECT_ROOT,                    // Where .claude/skills/ lives
-    settingSources: ["project"],          // Load skills from filesystem
-    allowedTools: ["Skill", "Read", "Grep", "Glob"],
-  },
-})) { ... }
-```
-
-## Skill: js-code-review
-
-The skill teaches the agent to check for:
-
-| Category | Issues |
-|----------|--------|
-| Quality | `var` usage, console.log, unused variables, magic numbers |
-| Bugs | Loose equality `==`, missing await, null access |
-| Security | eval(), innerHTML, hardcoded secrets |
-| Style | Arrow functions, destructuring, async/await |
+- The agent reviews `issues.js` using the **js-code-review** skill
+- Structured output includes filename, quality score, summary, a list of issues (with line numbers, severity, category, and suggestions), and recommendations
+- Issues are categorized as quality, bug, security, performance, or style with error/warning/info severity
 
 ## Key Takeaway
 
-Skills extend Claude with reusable expertise. Use `settingSources: ["project"]` to load skills from `.claude/skills/` and the `Skill` tool to apply them. Skills can only use Read, Grep, and Glob tools.
-
+Skills extend Claude with reusable expertise. Use `settingSources: ["project"]` to load skills from `.claude/skills/` and the `Skill` tool to apply them. Combined with structured outputs and Zod validation, this pattern provides consistent, type-safe code reviews across projects.

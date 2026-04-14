@@ -11,12 +11,14 @@ Your team needs to quickly understand files from various GitHub repositories. Bu
 ```
 demo/
 ├── src/
-│   ├── config/
-│   │   └── mcp.config.ts       # GitHub MCP configuration
-│   ├── github-summarizer.ts    # Exported function (deliverable)
-│   └── index.ts                # Test
+│   ├── github-summarizer.ts    # Summarizer agent using GitHub MCP
+│   └── index.ts                # Test runner
+├── .env.example
+├── package.json
 └── README.md
 ```
+
+> **Note:** The demo configures the GitHub MCP server inline in `github-summarizer.ts` rather than using a separate config file. The exercise introduces a dedicated `config/mcp.config.ts` pattern.
 
 ## Setup
 
@@ -52,68 +54,18 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: github-summarizer.ts
+## What You'll See
 
-```typescript
-// Zod schema for structured output
-export const GitHubFileSummarySchema = z.object({
-  repo: z.string().describe("Repository in format owner/repo"),
-  path: z.string().describe("File path within the repository"),
-  purpose: z.string().describe("The main purpose of this file"),
-  keySections: z.array(z.string()).describe("Key sections or functions"),
-  patterns: z.array(z.string()).describe("Notable patterns or techniques"),
-  summary: z.string().describe("Brief overall summary"),
-});
+The agent connects to the GitHub MCP server, fetches the README.md from the `anthropics/claude-cookbooks` repository, and returns a structured summary including:
 
-export type GitHubFileSummary = z.infer<typeof GitHubFileSummarySchema>;
+- **Repository and file path** identified
+- **Purpose** of the file
+- **Key sections** extracted from the content
+- **Notable patterns** or techniques used
+- **Brief summary** of the overall file
 
-export async function summarizeGitHubFile(
-  owner: string,
-  repo: string,
-  path: string
-): Promise<GitHubFileSummary>
-```
-
-## Key Pattern: MCP + Structured Output
-
-```typescript
-import { query } from "@anthropic-ai/claude-agent-sdk";
-
-for await (const message of query({
-  prompt: "Fetch and summarize this file...",
-  options: {
-    mcpServers: {
-      github: {
-        type: "http",
-        url: "https://api.githubcopilot.com/mcp/",
-        headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` },
-      },
-    },
-    allowedTools: ["mcp__github__*"],
-    // Structured output with Zod schema
-    outputFormat: {
-      type: "json_schema",
-      schema: GitHubFileSummaryJSONSchema,
-    },
-  },
-})) {
-  if (message.type === "result" && message.structured_output) {
-    return GitHubFileSummarySchema.parse(message.structured_output);
-  }
-}
-```
-
-## MCP Tool Naming
-
-Pattern: `mcp__<server-name>__<tool-name>`
-
-| Tool | Description |
-|------|-------------|
-| `mcp__github__get_file_contents` | Fetch file content from a repo |
-| `mcp__github__search_repositories` | Search for repositories |
-| `mcp__github__list_commits` | Get commit history |
+The output is validated against a Zod schema, demonstrating how MCP tool access and structured outputs work together.
 
 ## Key Takeaway
 
-MCP provides standardized access to external tools. Configure the GitHub MCP server, pass it to `query()` via `mcpServers`, and specify allowed tools with `mcp__` prefix. Combine with `outputFormat` and Zod schemas to get type-safe structured responses.
-
+MCP provides standardized access to external tools. Configure the GitHub MCP server, pass it to `query()` via `mcpServers`, and specify allowed tools with the `mcp__` prefix. Combine with `outputFormat` and Zod schemas to get type-safe structured responses.

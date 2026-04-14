@@ -1,10 +1,6 @@
-# Exercise: Claude Agent SDK - Contract Standardizer
+# Solution: Claude Agent SDK - Contract Standardizer
 
-Build an agent to standardize vendor contracts for legal review.
-
-## Scenario
-
-Your procurement team receives contracts in wildly different formats. Your legal team spends hours reformatting them to compare terms. Build an agent that reads contract files, extracts key terms, and writes standardized output files.
+Reference implementation of the contract standardizer agent that reads vendor contracts and writes standardized output files.
 
 ## Project Structure
 
@@ -16,15 +12,15 @@ src/
 │   ├── vendor.txt
 │   └── email.txt
 ├── standardized/            # Output (agent writes here)
-├── contract-standardizer.ts # Exported function (deliverable)
+│   └── .gitkeep
+├── contract-standardizer.ts # Completed implementation
 ├── sample-contracts.ts      # Contract file paths
-└── index.ts                 # Tests
+└── index.ts                 # Test runner
 ```
 
 ## Setup
 
 ```bash
-# From repo root (shared node_modules)
 npm install
 ```
 
@@ -35,7 +31,7 @@ Copy `.env.example` to `.env` (required in all environments):
 cp .env.example .env
 ```
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment -- the `.env` file only needs to provide `ANTHROPIC_MODEL`.
 
 For local development, also uncomment and fill in your credentials in `.env`:
 ```
@@ -44,8 +40,8 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
 **Troubleshooting:**
-- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+- **`Error: ANTHROPIC_MODEL is not set`** -- make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** -- in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
 ## Run
 
@@ -54,67 +50,15 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: contract-standardizer.ts
+## What You'll See
 
-```typescript
-export interface StandardizedContract {
-  inputPath: string;
-  outputPath: string;
-  raw: string;
-}
+| Step | Description |
+|------|-------------|
+| 1 | Agent reads `saas.txt` and writes `standardized-saas.md` |
+| 2 | Agent reads `email.txt` and writes `standardized-email.md` |
 
-export async function standardizeContract(
-  inputPath: string,
-  outputFilename: string
-): Promise<StandardizedContract>
-```
-
-## Agent Tools
-
-| Tool | Purpose |
-|------|---------|
-| Read | Read contract files from `contracts/` folder |
-| Write | Write standardized output to `standardized/` folder |
-
-## Standardized Output Format
-
-```markdown
-## Contract Summary
-
-### Parties
-- **Vendor:** [Name]
-- **Customer:** [Name]
-
-### Term
-- **Effective Date:** [Date]
-- **Duration:** [Length]
-
-### Financial Terms
-- **Payment Amount:** [Amount]
-- **Payment Frequency:** [Frequency]
-
-### Legal Terms
-- **Liability Cap:** [Terms]
-- **Termination Notice:** [Period]
-
-### IP & Data
-- **IP Ownership:** [Terms]
-- **Data Protection:** [Terms]
-
-### Risk Assessment
-- [Red flags or missing terms]
-```
-
-## Test Contracts
-
-| ID | File | Description |
-|----|------|-------------|
-| saas | saas.txt | Well-structured SaaS agreement |
-| consulting | consulting.txt | Less formal consulting SOW |
-| vendor | vendor.txt | Complex vendor MSA |
-| email | email.txt | Minimal email proposal |
+Each standardized file contains extracted Parties, Term, Financial Terms, Legal Terms, IP & Data, and Risk Assessment sections.
 
 ## Key Takeaway
 
-Agent SDK enables file-based document processing. The agent reads input files, processes content, and writes output files autonomously using Read and Write tools.
-
+The Agent SDK enables file-based document processing with minimal code. The agent autonomously reads input files, processes content, and writes structured output files using the Read and Write tools.

@@ -51,7 +51,10 @@ const CodeReviewResultSchema = z.object({
 export type CodeIssue = z.infer<typeof CodeIssueSchema>;
 export type CodeReviewResult = z.infer<typeof CodeReviewResultSchema>;
 
+// -----------------------------------------------------------------------------
 // TODO 2: Convert Zod schema to JSON Schema
+// -----------------------------------------------------------------------------
+
 // Hint: Use zodToJsonSchema(CodeReviewResultSchema, { $refStrategy: "root" })
 // The $refStrategy: "root" option properly inlines all $ref definitions
 type JsonSchema = Record<string, unknown>;
@@ -87,7 +90,7 @@ export async function reviewJavaScriptFile(
   filePath: string
 ): Promise<CodeReviewResult> {
 
-  //TODO implement function
+  // TODO: Implement function
   // TODO: Validate structured_output with Zod
   // const parsed = CodeReviewResultSchema.safeParse(message.structured_output);
   // if (parsed.success) return parsed.data;

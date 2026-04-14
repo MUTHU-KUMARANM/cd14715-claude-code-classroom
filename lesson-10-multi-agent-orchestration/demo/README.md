@@ -1,7 +1,5 @@
 # Demo: Multi-Agent Orchestration - Research Assistant
 
-Coordinate specialized subagents for comprehensive research.
-
 ## Scenario
 
 A research assistant needs to investigate topics thoroughly. Instead of one generalist agent, we use three specialists coordinated by an orchestrator:
@@ -9,13 +7,17 @@ A research assistant needs to investigate topics thoroughly. Instead of one gene
 - **Analyzer**: Finds patterns and insights in data
 - **Summarizer**: Creates final reports
 
+The orchestrator coordinates these subagents in sequence, combining their outputs into a comprehensive research report.
+
 ## Project Structure
 
 ```
 demo/
 ├── src/
-│   ├── research-orchestrator.ts  # Exported function (deliverable)
-│   └── index.ts                  # Test
+│   ├── research-orchestrator.ts  # Orchestrator with subagent definitions
+│   └── index.ts                  # Demo runner
+├── .env.example                  # Environment template
+├── package.json
 └── README.md
 ```
 
@@ -52,73 +54,14 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: research-orchestrator.ts
+## What You'll See
 
-```typescript
-export async function conductResearch(
-  topic: string
-): Promise<ResearchResult>
-```
-
-## Key Pattern: Subagents
-
-```typescript
-// Define subagents inline
-const subagents = {
-  researcher: {
-    description: "Research specialist that gathers information",
-    prompt: "You are a research specialist...",
-    tools: ["WebSearch"],
-    model: "sonnet",
-  },
-  analyzer: {
-    description: "Analysis specialist that finds patterns",
-    prompt: "You are a data analysis specialist...",
-    tools: [],
-    model: "sonnet",
-  },
-  summarizer: {
-    description: "Summarization specialist that creates reports",
-    prompt: "You are a summarization specialist...",
-    tools: [],
-    model: "haiku",
-  },
-};
-
-// Orchestrator invokes subagents via Task tool
-for await (const message of query({
-  prompt: orchestratorPrompt,
-  options: {
-    allowedTools: ["Task"],  // Required for subagent invocation
-    agents: subagents,       // Register subagents
-    maxTurns: 15,
-  },
-})) { ... }
-```
-
-## Architecture
-
-```
-USER REQUEST: "Research [topic]"
-     ↓
-ORCHESTRATOR (allowedTools: ["Task"])
-     ↓
-     ├─→ researcher (WebSearch) ─→ Findings ─┐
-     ├─→ analyzer ───────────────→ Insights ─┤
-     └─→ summarizer ─────────────→ Summary ──┤
-                                              ↓
-                                        FINAL REPORT
-```
-
-## Orchestration Patterns
-
-| Pattern | Description | Use When |
-|---------|-------------|----------|
-| Sequential | A → B → C | Each agent needs previous output |
-| Parallel | A + B + C → Combine | Tasks are independent |
-| Hybrid | (A + B) → C | Mix of both |
+1. The orchestrator invokes the **researcher** subagent to gather information via web search
+2. The **analyzer** subagent identifies patterns and insights from the research
+3. The **summarizer** subagent creates a final report
+4. Console output shows each subagent invocation with elapsed time
+5. A comprehensive research report with executive summary, key findings, analysis, and recommendations
 
 ## Key Takeaway
 
-Use the `agents` parameter in `query()` to define subagents, then give the orchestrator `Task` in `allowedTools` so it can invoke them. Each subagent has its own description, prompt, tools, and model.
-
+Use the `agents` parameter in `query()` to define subagents, then give the orchestrator `Task` in `allowedTools` so it can invoke them. Each subagent has its own description, prompt, tools, and model — the orchestrator coordinates their outputs into a final result.

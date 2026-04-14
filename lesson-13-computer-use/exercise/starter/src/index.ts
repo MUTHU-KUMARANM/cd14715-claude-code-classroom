@@ -12,11 +12,11 @@
  *
  * YOUR TASK:
  * 1. Open src/form-agent.ts
- * 2. Implement TODO 1: createComputerTool()
- * 3. Implement TODO 2: runFormAutomationAgent()
- *    - TODO 2a: Make the API call with computer use
- *    - TODO 2b: Format tool results (screenshots vs text)
- *    - TODO 2c: Append messages to conversation
+ * 2. Implement TODO: (1) createComputerTool()
+ * 3. Implement TODO: (2) runFormAutomationAgent()
+ *    - TODO: (2a) Make the API call with computer use
+ *    - TODO: (2b) Format tool results (screenshots vs text)
+ *    - TODO: (2c) Append messages to conversation
  */
 
 import "dotenv/config";
@@ -58,7 +58,7 @@ async function main() {
     console.log("Computer Use Tool:");
     console.log(`  Display: ${computerTool.display_width_px}x${computerTool.display_height_px}`);
   } catch (error) {
-    console.log("Computer Use Tool: NOT IMPLEMENTED (TODO 1)");
+    console.log("Computer Use Tool: NOT IMPLEMENTED (TODO: 1)");
   }
   console.log();
 
@@ -157,13 +157,13 @@ function showDemoMode() {
   console.log(`
 Open src/form-agent.ts and implement the following:
 
-TODO 1: createComputerTool()
+TODO: (1) createComputerTool()
    Return a ComputerUseTool object with:
    - type: "computer_20250124"
    - name: "computer"
    - display_width_px and display_height_px
 
-TODO 2: runFormAutomationAgent()
+TODO: (2) runFormAutomationAgent()
    2a. Make API call with:
        - client.beta.messages.create
        - betas: ["computer-use-2025-01-24"]

@@ -1,24 +1,23 @@
 # Demo: Claude Agent SDK - Document Summarizer
 
-Build your first agent using the Claude Agent SDK.
+Build your first agent using the Claude Agent SDK to read files and produce structured summaries.
 
 ## Scenario
 
-A documentation team needs an automated summarizer that can read files, extract key points, and produce structured summaries.
+A documentation team needs an automated summarizer that can read files, extract key points, and produce structured summaries. Using the Agent SDK's `query()` function with the `Read` tool, the agent handles file access and content analysis automatically -- no manual tool-call handling required.
 
 ## Project Structure
 
 ```
 src/
-├── document-summarizer.ts # Exported function (deliverable)
+├── document-summarizer.ts # Agent function (deliverable)
 ├── sample-api-guide.md    # Test document
-└── index.ts               # Tests for the function
+└── index.ts               # Test runner
 ```
 
 ## Setup
 
 ```bash
-# From repo root (shared node_modules)
 npm install
 ```
 
@@ -29,7 +28,7 @@ Copy `.env.example` to `.env` (required in all environments):
 cp .env.example .env
 ```
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment -- the `.env` file only needs to provide `ANTHROPIC_MODEL`.
 
 For local development, also uncomment and fill in your credentials in `.env`:
 ```
@@ -38,8 +37,8 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
 **Troubleshooting:**
-- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+- **`Error: ANTHROPIC_MODEL is not set`** -- make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** -- in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
 ## Run
 
@@ -48,60 +47,14 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: document-summarizer.ts
-
-```typescript
-export interface DocumentSummary {
-  keyPoints: string[];
-  summary: string;
-  raw: string;
-}
-
-export async function summarizeDocument(
-  filePath: string
-): Promise<DocumentSummary>
-```
-
-## Agent SDK Pattern
-
-```typescript
-import { query } from "@anthropic-ai/claude-agent-sdk";
-
-// 1. Create prompt function
-const prompt = (filePath: string) => `Read and summarize: ${filePath}`;
-
-// 2. Call query with tools
-const result = query({
-  prompt: prompt(filePath),
-  options: { allowedTools: ["Read"] },
-});
-
-// 3. Iterate over results
-for await (const message of result) {
-  if (message.type === "result" && message.subtype === "success") {
-    return message.result;
-  }
-}
-```
-
-## Tests (index.ts)
+## What You'll See
 
 | Step | Description |
 |------|-------------|
-| 1 | Summarize sample API guide |
-| 2 | Show full raw agent output |
-
-## Key Benefit
-
-Agent SDK handles tool execution automatically. The agent:
-1. Sees the Read tool is available
-2. Uses Read to fetch the file
-3. Analyzes content
-4. Returns formatted response
-
-No manual tool call handling needed!
+| 1 | Agent reads `sample-api-guide.md` using the Read tool |
+| 2 | Agent extracts 3-5 key points and a concise summary |
+| 3 | Structured `DocumentSummary` object is returned |
 
 ## Key Takeaway
 
-The Claude Agent SDK simplifies building agentic systems by handling tool execution automatically. Use `query()` with `allowedTools` and the SDK manages the ReAct loop.
-
+The Claude Agent SDK simplifies building agentic systems by handling tool execution automatically. Call `query()` with `allowedTools`, iterate the results, and the agent manages the entire ReAct loop -- reading files, analyzing content, and returning structured output without any manual tool-call handling.

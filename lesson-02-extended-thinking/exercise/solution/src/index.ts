@@ -75,7 +75,6 @@ async function testWithThinking() {
   console.log("📊 Analysis:");
   console.log(result.analysis);
 
-
   console.log(`💭 Thinking steps captured: ${result.thinkingSteps.length}`);
 
   if (result.thinkingSteps.length > 0) {
@@ -85,8 +84,6 @@ async function testWithThinking() {
 
   console.log("\n✅ Extended thinking provides audit trail for compliance!");
 }
-
-
 
 // -----------------------------------------------------------------------------
 // Main

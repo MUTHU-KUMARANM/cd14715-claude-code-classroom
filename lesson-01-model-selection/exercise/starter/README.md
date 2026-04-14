@@ -1,12 +1,46 @@
 # Exercise: Claude Model Selection - Support Ticket Classifier
 
 ## Objective
+
 Build a support ticket classification system that intelligently routes requests to different Claude models based on complexity.
 
 ## Learning Goals
+
 - Understand when to use Haiku vs Sonnet vs Opus
 - Compare model performance, cost, and latency trade-offs
 - Implement intelligent model routing based on task complexity
+- Practice using helper utilities to measure and display results
+
+## Project Structure
+
+```
+src/
+├── classifier.ts     # Main exercise file (4 steps to complete)
+├── helpers.ts        # Utility functions (cost, stats, comparison)
+├── models.ts         # Model definitions & pricing
+└── sample-tickets.ts # Test data
+```
+
+## Setup
+
+```bash
+npm install
+```
+
+## Authentication Setup
+
+Copy `.env.example` to `.env` (required in all environments):
+```bash
+cp .env.example .env
+```
+
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+
+For local development, also uncomment and fill in your credentials in `.env`.
+
+**Troubleshooting:**
+- **`Error: ANTHROPIC_MODEL is not set`** — make sure your `.env` file exists and contains a valid model name
+- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
 ## Your Tasks
 
@@ -32,25 +66,6 @@ Complete the `classifier.ts` file by implementing the four test functions:
 - Run all three models on the same moderate ticket
 - Compare time, tokens, and cost using the `displayComparison()` helper
 
-## Setup
-
-```bash
-# From repo root (shared node_modules)
-npm install
-```
-
-## Authentication Setup
-
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment.
-
-For local development, copy `.env.example` to `.env` and uncomment your credentials:
-```bash
-cp .env.example .env
-```
-
-**Troubleshooting:**
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
-
 ## Run
 
 ```bash
@@ -66,36 +81,3 @@ npm start
 - [ ] Step 4 shows comparison table
 - [ ] Cost calculations are accurate
 - [ ] Timing measurements are shown
-
-## Model Guide
-
-| Model | Best For | Speed | Cost |
-|-------|----------|-------|------|
-| **Haiku** | Simple classification, extraction | Fast | Low |
-| **Sonnet** | Balanced analysis, most common tasks | Medium | Medium |
-| **Opus** | Complex reasoning, multi-factor analysis | Slower | Higher |
-
-## Helper Functions
-
-The `helpers.ts` file provides three utility functions:
-- `calculateCost()` - Calculate API call cost from token usage
-- `logStats()` - Display time, tokens, and cost for a single result
-- `displayComparison()` - Display comparison table for multiple model results
-
-## Hints
-
-1. Use the `callClaude()` helper function to make API calls
-2. Use `logStats()` to display individual test results
-3. Use `displayComparison()` to show the model comparison table
-4. Check `models.ts` for model IDs and pricing
-5. Check `sample-tickets.ts` for test data
-6. Follow the system prompts in comments for each step
-7. The solution demonstrates proper model selection patterns
-
-## Next Steps
-
-After completing this exercise, try:
-- Adding your own ticket types
-- Experimenting with different system prompts
-- Measuring quality differences between models
-- Implementing automatic model selection based on ticket analysis

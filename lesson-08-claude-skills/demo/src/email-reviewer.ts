@@ -119,7 +119,6 @@ export async function reviewEmail(
         type: "json_schema",
         schema: EmailReviewJSONSchema,
       },
-
     },
   })) {
     if (message.type === "assistant") {

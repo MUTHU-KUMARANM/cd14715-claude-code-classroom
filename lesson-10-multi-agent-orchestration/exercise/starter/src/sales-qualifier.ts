@@ -68,7 +68,6 @@ export const SalesBriefingJSONSchema = zodToJsonSchema(SalesBriefingSchema, {
 // -----------------------------------------------------------------------------
 
 async function* generateMessages(userMessage: string) {
-
   throw new Error("TODO: Implement generateMessages async generator");
 }
 
@@ -84,8 +83,8 @@ const subagents: Record<string, AgentDefinition> = {
   // - prompt: Instructions for gathering company size, industry, tech stack, news
   // - tools: ["WebSearch"] (for web research)
   "company-researcher": {
-    description: "", // TODO
-    prompt: "", // TODO
+    description: "", // TODO: Add description
+    prompt: "", // TODO: Add prompt
     tools: [], // TODO: What tools does this agent need?
     model: "sonnet", // Use model string
   },
@@ -96,8 +95,8 @@ const subagents: Record<string, AgentDefinition> = {
   // - tools: [] (no tools needed, uses provided context)
   // - model: "haiku" (simpler analysis, lower cost)
   "competitive-analyzer": {
-    description: "", // TODO
-    prompt: "", // TODO
+    description: "", // TODO: Add description
+    prompt: "", // TODO: Add prompt
     tools: [], // No tools needed
     model: "haiku",
   },
@@ -108,8 +107,8 @@ const subagents: Record<string, AgentDefinition> = {
   // - tools: [] (no tools needed)
   // - model: "haiku"
   "qualification-scorer": {
-    description: "", // TODO
-    prompt: "", // TODO
+    description: "", // TODO: Add description
+    prompt: "", // TODO: Add prompt
     tools: [],
     model: "haiku",
   },

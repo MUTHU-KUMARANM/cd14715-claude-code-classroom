@@ -91,16 +91,13 @@ export async function standardizeContract(
 ): Promise<StandardizedContract> {
   const outputPath = path.join(STANDARDIZED_FOLDER, outputFilename);
 
-
-  //TODO implement the function
-
+  // TODO: Implement the function
 
   return {
     inputPath,
     outputPath,
-    raw: '' // TODO return raw result
+    raw: '' // TODO: Return raw result
   };
 
-
-  //TODO: Catch any errors and re-throw with message: "Failed to standardize contract: {original message}"
+  // TODO: Catch any errors and re-throw with message: "Failed to standardize contract: {original message}"
 }

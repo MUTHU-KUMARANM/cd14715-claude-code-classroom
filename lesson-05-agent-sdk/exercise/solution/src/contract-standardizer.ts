@@ -100,7 +100,6 @@ export async function standardizeContract(
 
     let rawResult = "";
 
-
     for await (const message of result) {
       if (message.type !== "result") continue;
       if (message.subtype === "success") {

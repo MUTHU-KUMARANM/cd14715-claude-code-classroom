@@ -1,7 +1,5 @@
 # Demo: Claude Skills - Multi-Skill Email Analysis
 
-Build an agent that uses multiple Claude Skills for comprehensive email analysis.
-
 ## Scenario
 
 Your team reviews emails but lacks consistent quality standards. Build an agent that uses **two skills** to analyze emails:
@@ -21,7 +19,7 @@ demo/
 ├── src/
 │   ├── email-reviewer.ts       # Exported function (deliverable)
 │   ├── sample-emails.ts        # Test emails
-│   └── index.ts                # Test
+│   └── index.ts                # Test harness
 └── README.md
 ```
 
@@ -58,59 +56,12 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Key Pattern: Multi-Skill Usage
+## What You'll See
 
-Claude autonomously discovers and uses multiple skills based on their descriptions:
+- An email is analyzed using both the **email-etiquette** and **communication-style** skills
+- Structured output includes tone assessment, communication style, quality score, specific issues with severity, and strengths
+- If the score is below 80, a revised version of the email is suggested
 
-```typescript
-for await (const message of query({
-  prompt: `Use the available skills to analyze this email...`,
-  options: {
-    cwd: PROJECT_ROOT,                    // Where .claude/skills/ lives
-    settingSources: ["project"],          // Load skills from filesystem
-    allowedTools: ["Skill", "Read", "Grep", "Glob"],
-  },
-})) { ... }
-```
+## Key Takeaway
 
-Claude reads the YAML frontmatter `description` in each SKILL.md to decide which skills are relevant.
-
-## Skills
-
-### email-etiquette
-
-| Category | Issues |
-|----------|--------|
-| Tone | Too casual (slang, emojis), Too formal (archaic language) |
-| Structure | Missing greeting, unclear purpose, no sign-off |
-| Clarity | Vague requests, missing context |
-| Grammar | Typos, incomplete sentences |
-
-### communication-style
-
-| Style | Characteristics |
-|-------|-----------------|
-| Assertive | Clear, direct, respectful "I" statements |
-| Passive | Excessive hedging, over-apologizing |
-| Aggressive | Blaming, demanding, dismissive |
-| Passive-aggressive | Backhanded compliments, sarcasm |
-
-## SKILL.md Frontmatter
-
-Each skill requires YAML frontmatter with a `description` for Claude to discover it:
-
-```yaml
----
-description: "Professional email communication expert..."
----
-
-# Email Etiquette Skill
-...
-```
-
-## Key Takeaways
-
-1. **Multiple Skills**: Store related skills in `.claude/skills/` subdirectories
-2. **Skill Discovery**: Claude uses the `description` frontmatter to find relevant skills
-3. **Autonomous Selection**: Claude decides which skills to invoke based on the task
-4. **Consistent Analysis**: Skills provide reusable expertise across agents
+Skills extend Claude with reusable, domain-specific expertise. Store multiple skills in `.claude/skills/` subdirectories, and Claude autonomously discovers and selects the relevant ones based on each skill's `description` frontmatter. Combined with structured outputs, skills provide consistent, type-safe analysis across agents.

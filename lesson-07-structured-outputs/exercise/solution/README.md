@@ -1,18 +1,16 @@
-# Exercise: Structured Outputs - Meeting Notes Analyzer
-
-Extract structured data from meeting transcripts using Zod schemas.
-
-## Scenario
-
-Your team records meetings but struggles to extract actionable information. Build a system that automatically identifies action items, decisions, and participants with structured, validated output.
+# Solution: Structured Outputs - Meeting Notes Analyzer
 
 ## Project Structure
 
 ```
-src/
-├── meeting-analyzer.ts   # Exported function (deliverable)
-├── sample-transcripts.ts # Test transcripts
-└── index.ts              # Test
+solution/
+├── src/
+│   ├── index.ts              # Test runner
+│   ├── meeting-analyzer.ts   # Complete implementation
+│   └── sample-transcripts.ts # Test transcripts
+├── .env.example
+├── package.json
+└── README.md
 ```
 
 ## Setup
@@ -48,67 +46,13 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: meeting-analyzer.ts
+## What You'll See
 
-```typescript
-export const ActionItemSchema = z.object({
-  task: z.string(),
-  assignee: z.string(),
-  dueDate: z.string(),
-  priority: z.enum(["low", "medium", "high"]),
-});
-
-export const DecisionSchema = z.object({
-  decision: z.string(),
-  rationale: z.string(),
-  impact: z.enum(["low", "medium", "high"]),
-});
-
-export const MeetingAnalysisSchema = z.object({
-  date: z.string(),
-  participants: z.array(z.string()),
-  topic: z.string(),
-  actionItems: z.array(ActionItemSchema),
-  decisions: z.array(DecisionSchema),
-  nextMeetingDate: z.string().optional(),
-  summary: z.string().max(500),
-});
-
-export type ActionItem = z.infer<typeof ActionItemSchema>;
-export type Decision = z.infer<typeof DecisionSchema>;
-export type MeetingAnalysis = z.infer<typeof MeetingAnalysisSchema>;
-
-export async function analyzeMeeting(transcript: string): Promise<MeetingAnalysis>
-```
-
-## Expected Output
-
-```typescript
-{
-  date: "2024-01-15",
-  participants: ["Alice", "Bob", "Charlie"],
-  topic: "Q1 Planning",
-  actionItems: [
-    {
-      task: "Create project timeline",
-      assignee: "Alice",
-      dueDate: "2024-01-20",
-      priority: "high"
-    }
-  ],
-  decisions: [
-    {
-      decision: "Use React for frontend",
-      rationale: "Team expertise and ecosystem",
-      impact: "high"
-    }
-  ],
-  nextMeetingDate: "2024-01-22",
-  summary: "Team discussed Q1 priorities..."
-}
-```
+1. A sprint planning meeting transcript is analyzed using structured outputs
+2. The agent extracts `date`, `participants`, `topic`, `actionItems`, `decisions`, and `summary`
+3. Each action item includes `task`, `assignee`, `dueDate`, and `priority`
+4. Each decision includes `decision`, `rationale`, and `impact`
 
 ## Key Takeaway
 
-Structured outputs with Zod schemas ensure predictable, validated data extraction. Use `zodToJsonSchema()` to convert Zod schemas for the `outputFormat` option in `query()`.
-
+Structured outputs with Zod schemas ensure predictable, validated data extraction. The `.describe()` calls on Zod fields guide the LLM on what to extract, and `zodToJsonSchema()` converts Zod schemas for the `outputFormat` option in `query()`.

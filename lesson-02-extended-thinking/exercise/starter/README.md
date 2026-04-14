@@ -1,50 +1,77 @@
 # Exercise: Extended Thinking for Fraud Detection
 
 ## Objective
+
 Build a fraud detection analyzer that uses Claude's extended thinking feature to capture reasoning trails for compliance audits.
 
 ## Learning Goals
-- Enable and configure extended thinking with budget_tokens
+
+- Enable and configure extended thinking with `budget_tokens`
 - Extract thinking blocks from API responses
 - Distinguish between "thinking" and "text" content blocks
 - Capture reasoning trails for audit purposes
 
-## Your Task
+## Project Structure
 
-Complete the `fraud-analyzer.ts` file by implementing the `analyzeFraudRisk()` function:
-
-### Step 1: Configure Extended Thinking
-- Enable extended thinking 
-- Set `max_tokens: 16000` (must be larger than budget_tokens)
-- Use the model from environment variable
-
-### Step 2: Build the Analysis Prompt
-- Include transaction details (amount, merchant, location, time)
-- Include customer history (typical amount, location, account age, flags)
-- Ask for fraud analysis with risk level and recommendation
-
-### Step 3: Extract Content Blocks
-- Loop through `response.content`
-- Capture `thinking` blocks 
-- Capture `text` block as the analysis
+```
+src/
+├── fraud-analyzer.ts      # Your task: implement analyzeFraudRisk()
+├── sample-transactions.ts # 5 test transactions with different risk levels
+└── index.ts               # Tests for your implementation
+```
 
 ## Setup
 
 ```bash
 # From repo root (shared node_modules)
 npm install
+```
 
-# From this directory (lesson-02-extended-thinking/exercise/starter):
+## Authentication Setup
+
+Copy `.env.example` to `.env` (required in all environments):
+```bash
 cp .env.example .env
 ```
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
 
 For local development, also uncomment and fill in your credentials in `.env`:
 ```
 ANTHROPIC_API_KEY=your-key-here
 ANTHROPIC_BASE_URL=your-base-url-here
 ```
+
+**Troubleshooting:**
+- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+
+## Your Tasks
+
+Complete the `fraud-analyzer.ts` file by implementing the `analyzeFraudRisk()` function:
+
+### Step 1: Configure Extended Thinking
+
+Enable extended thinking in the `client.messages.create()` call:
+
+```typescript
+thinking: {
+  type: "enabled",
+  budget_tokens: 10000,
+},
+```
+
+Set `max_tokens: 16000` (must be larger than `budget_tokens`).
+
+### Step 2: Build the Analysis Prompt
+
+Include transaction details (amount, merchant, location, time) and customer history (typical amount, location, account age, flags). Ask Claude to analyze for fraud patterns and provide a risk level and recommendation.
+
+### Step 3: Extract Content Blocks
+
+Loop through `response.content` and:
+- Capture `thinking` blocks into the `thinkingSteps` array
+- Capture the `text` block as the `analysis` string
 
 ## Run
 
@@ -55,33 +82,8 @@ npm start
 
 ## Success Criteria
 
-- [ ] Extended thinking is enabled with budget_tokens
-- [ ] Thinking steps are extracted from response.content
+- [ ] Extended thinking is enabled with `budget_tokens`
+- [ ] Thinking steps are extracted from `response.content`
 - [ ] Analysis text is captured from text blocks
-- [ ] All 5 transactions are analyzed successfully
-- [ ] Thinking steps count > 0 for each transaction
-
-## Extended Thinking API Reference
-
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| `thinking.type` | `"enabled"` | Enables extended thinking |
-| `thinking.budget_tokens` | `10000` | Max tokens for thinking (These are billable at standard output rates) |
-| `max_tokens` | `16000` | Must be > budget_tokens |
-
-
-
-## Hints
-
-1. Extended thinking requires `max_tokens` > `budget_tokens`
-2. Use template literals to build the prompt with transaction data
-3. Check `sample-transactions.ts` for the Transaction interface
-5. The test runner (`index.ts`) validates your implementation
-
-
-## Next Steps
-
-After completing this exercise, try:
-- Adjusting `budget_tokens` to see how it affects reasoning depth
-- Adding more detailed prompts for specific fraud patterns
-- Comparing thinking output between different transaction types
+- [ ] Transaction is analyzed successfully
+- [ ] Thinking steps count > 0

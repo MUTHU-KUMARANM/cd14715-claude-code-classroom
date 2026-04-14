@@ -1,63 +1,22 @@
-# Lesson 13 Demo: Computer Use Capabilities
+# Demo: Computer Use Capabilities
 
-This demo introduces Claude's computer use feature for GUI automation, covering the architecture, safety considerations, and implementation patterns.
+Claude's computer use feature enables GUI automation through a screenshot-action feedback loop. This demo shows the implementation patterns using mock actions -- real computer use requires a sandboxed environment (Docker/VM).
 
-## Learning Objectives
+## Project Structure
 
-- Understand computer use architecture and the screenshot-action loop
-- Learn safety requirements including sandboxing and access controls
-- See how to configure the computer use tool with the Anthropic SDK
-- Explore coordinate scaling for different display resolutions
-
-## Key Concepts
-
-### Computer Use Architecture
-
-Claude's computer use works through a visual feedback loop:
-
-1. **Screenshot** - Claude receives a screenshot of the virtual display
-2. **Analysis** - Claude identifies UI elements and determines actions
-3. **Action** - Claude returns pixel coordinates for mouse/keyboard actions
-4. **Execution** - Actions are executed in the sandboxed environment
-5. **Repeat** - New screenshot taken to verify and continue
-
-### Available Actions
-
-| Action | Description | Parameters |
-|--------|-------------|------------|
-| `screenshot` | Capture current display | None |
-| `left_click` | Single left click | `coordinate: [x, y]` |
-| `right_click` | Right click | `coordinate: [x, y]` |
-| `double_click` | Double click | `coordinate: [x, y]` |
-| `middle_click` | Middle button click | `coordinate: [x, y]` |
-| `mouse_move` | Move cursor | `coordinate: [x, y]` |
-| `type` | Type text | `text: string` |
-| `key` | Press key/combo | `text: "ctrl+s"` |
-| `scroll` | Scroll at position | `coordinate`, `direction`, `amount` |
-| `left_click_drag` | Drag operation | `startCoordinate`, `endCoordinate` |
-| `wait` | Pause execution | `duration: number` (seconds) |
-
-### Safety Requirements
-
-Computer use requires strict sandboxing:
-
-```typescript
-const DEFAULT_SAFETY_CONFIG = {
-  useVirtualMachine: true,    // Run in VM
-  useDocker: true,            // Or Docker container
-  maxActionsPerSession: 100,  // Limit actions
-  requireConfirmationFor: ["login", "payment", "delete", "submit"],
-  logAllActions: true,        // Audit trail
-  screenshotOnError: true,    // Debug captures
-};
+```
+src/
+├── index.ts               # Demo entry point
+├── types.ts               # Action types and tool definitions
+├── action-handlers.ts     # Mock action implementations
+└── computer-use-client.ts # Agent loop and tool configuration
 ```
 
-### Display Configuration
+## Setup
 
-For optimal performance, keep display resolution within limits:
-- Maximum 1568 pixels on longest edge
-- Maximum 1,150,000 total pixels
-- Use scaling for high-resolution displays
+```bash
+npm install
+```
 
 ## Authentication Setup
 
@@ -66,7 +25,7 @@ Copy `.env.example` to `.env` (required in all environments):
 cp .env.example .env
 ```
 
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment -- the `.env` file only needs to provide `ANTHROPIC_MODEL`.
 
 For local development, also uncomment and fill in your credentials in `.env`:
 ```
@@ -75,67 +34,23 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
 **Troubleshooting:**
-- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+- **`Error: ANTHROPIC_MODEL is not set`** -- make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** -- in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
-## Running the Demo
+## Run
 
 ```bash
-# From this directory (lesson-13-computer-use/demo)
-# Install dependencies
-npm install
-
-# Copy environment file (if not already done)
-cp .env.example .env
-
-# Run the demo
 npm start
 ```
 
-## Code Structure
+## What You'll See
 
-```
-src/
-├── index.ts              # Demo entry point
-├── types.ts              # Action types and tool definitions
-├── action-handlers.ts    # Mock action implementations
-└── computer-use-client.ts # Agent loop and tool configuration
-```
+1. **Safety check** -- validates sandbox environment (mock mode for demo)
+2. **Display configuration** -- resolution and scale factor settings
+3. **Tool configuration** -- computer use tool definition with display dimensions
+4. **Safety configuration** -- action limits, logging, and confirmation requirements
+5. **Agent demo** -- runs the computer use agent loop (mock actions if no API key)
 
-## Tool Configuration
+## Key Takeaway
 
-```typescript
-// Computer use tool definition
-const computerTool = {
-  type: "computer_20250124",
-  name: "computer",
-  display_width_px: 1024,
-  display_height_px: 768,
-  display_number: 1,
-};
-
-// API call with computer use beta
-const response = await client.beta.messages.create({
-  model: "claude-sonnet-4-5-20250929",
-  max_tokens: 4096,
-  tools: [computerTool, bashTool, textEditorTool],
-  messages,
-  betas: ["computer-use-2025-01-24"],
-});
-```
-
-## Production Considerations
-
-This demo uses mock implementations. For production:
-
-1. **Use the official quickstart**: https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo
-2. **Run in Docker** with Xvfb virtual display
-3. **Implement actual action handlers** using xdotool or similar
-4. **Add network restrictions** to limit accessible domains
-5. **Enable comprehensive logging** for security audits
-
-## Related Resources
-
-- [Computer Use Documentation](https://docs.anthropic.com/en/docs/agents-and-tools/computer-use)
-- [Computer Use Quickstart](https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo)
-- [OSWorld Benchmark](https://os-world.github.io/)
+Computer use follows a screenshot-action loop: Claude receives screenshots, analyzes the UI, returns pixel coordinates for actions, and repeats. All computer use must run in a sandboxed environment with safety controls like action limits, domain restrictions, and audit logging.

@@ -116,7 +116,7 @@ Extract:
 Be thorough in extracting action items - look for tasks assigned with phrases like "will do", "take care of", "responsible for", etc.
 For dates, convert relative dates (like "next Friday") to ISO format based on the meeting date.`;
 
-  // TODO: Step 6 - Call query() with structured output configuration
+  // TODO: Step 5 - Call query() with structured output configuration
 
   for await (const message of query({
     prompt,
@@ -126,7 +126,7 @@ For dates, convert relative dates (like "next Friday") to ISO format based on th
 
     },
   })) {
-    // TODO: Step 7 - Handle the structured output response
+    // TODO: Step 6 - Handle the structured output response
     //
     // Check for a successful result message:
     //   - message.type === "result"

@@ -4,7 +4,7 @@ Analyze JavaScript files for code quality using ESLint MCP.
 
 ## Objective
 
-Complete `src/code-reviewer.ts` to implement `reviewCodeFile()`, which uses the ESLint MCP server to lint JavaScript files and return a structured quality report.
+Complete `src/config/mcp.config.ts` and `src/code-reviewer.ts` to implement `reviewCodeFile()`, which uses the ESLint MCP server to lint JavaScript files and return a structured quality report.
 
 ## Learning Goals
 
@@ -16,16 +16,20 @@ Complete `src/code-reviewer.ts` to implement `reviewCodeFile()`, which uses the 
 ## Project Structure
 
 ```
-src/
-├── config/
-│   └── mcp.config.ts       # ESLint MCP configuration (provided)
-├── sample-code/
-│   ├── clean.js            # Well-written code
-│   ├── issues.js           # Code with common issues
-│   └── errors.js           # Code with multiple errors
-├── sample-code.ts          # File paths (provided)
-├── code-reviewer.ts        # YOUR IMPLEMENTATION (has TODOs)
-└── index.ts                # Test runner (do not modify)
+starter/
+├── src/
+│   ├── config/
+│   │   └── mcp.config.ts       # ESLint MCP configuration (has TODOs)
+│   ├── sample-code/
+│   │   ├── clean.js            # Well-written code
+│   │   ├── issues.js           # Code with common issues
+│   │   └── errors.js           # Code with multiple errors
+│   ├── sample-code.ts          # File paths (provided)
+│   ├── code-reviewer.ts        # YOUR IMPLEMENTATION (has TODOs)
+│   └── index.ts                # Test runner (do not modify)
+├── .env.example
+├── package.json
+└── README.md
 ```
 
 ## Setup
@@ -56,64 +60,25 @@ ANTHROPIC_BASE_URL=your-base-url-here
 
 ## Your Tasks
 
-Complete the three TODOs in `src/code-reviewer.ts`:
+Complete the TODOs across two files:
 
-### TODO 1: Implement `generateMessages()` async generator
+### `src/config/mcp.config.ts` (Steps 1-2)
 
-MCP servers require streaming input mode. Implement the generator:
+**Step 1:** Configure the ESLint MCP server using stdio transport. The server package is `@eslint/mcp@latest` and runs via `npx`. Fill in the `command` and `args` fields.
 
-```typescript
-async function* generateMessages(userMessage: string) {
-  yield {
-    type: "user" as const,
-    message: { role: "user" as const, content: userMessage },
-    parent_tool_use_id: null,
-    session_id: "code-review-session",
-  };
-}
-```
+**Step 2:** Define the allowed ESLint MCP tools. MCP tools follow the naming convention `mcp__<server-name>__<tool-name>`. The ESLint MCP server provides a `lint` tool.
 
-### TODO 2: Call `query()` with MCP configuration
+### `src/code-reviewer.ts` (Steps 1-3)
 
-Use the imported `mcpServersConfig` and `eslintTools` from `mcp.config.ts`:
+**Step 1:** Implement the `generateMessages()` async generator. MCP servers require streaming input mode. The generator should yield a single user message object with `type`, `message`, `parent_tool_use_id`, and `session_id` fields.
 
-```typescript
-for await (const message of query({
-  prompt: generateMessages(userMessage),
-  options: {
-    mcpServers: mcpServersConfig,
-    model,
-    allowedTools: [...eslintTools, 'Read'],
-    outputFormat: {
-      type: "json_schema",
-      schema: CodeQualityReportJSONSchema,
-    },
-  },
-})) {
-  // handle messages (TODO 3)
-}
-```
+**Step 2:** Call `query()` with MCP configuration. Use the imported `mcpServersConfig` and `eslintTools` from `mcp.config.ts`. Pass them via the `options` object along with `model`, `allowedTools`, and `outputFormat` (using `CodeQualityReportJSONSchema`).
 
-### TODO 3: Handle the message stream
+**Step 3:** Handle the message stream inside the `for await` loop. Check for three message types:
 
-Check for three message types:
-
-```typescript
-// 1. MCP server connection status
-if (message.type === "init") {
-  // check mcpServers connection status, throw if "failed"
-}
-
-// 2. Tool use logging
-if (message.type === "assistant") {
-  // log tool_use blocks for visibility
-}
-
-// 3. Structured result
-if (message.type === "result" && message.subtype === "success" && message.structured_output) {
-  return CodeQualityReportSchema.parse(message.structured_output);
-}
-```
+- `message.type === "init"` -- verify MCP server connection status; throw if any server has `"failed"` status
+- `message.type === "assistant"` -- log any `tool_use` blocks for visibility
+- `message.type === "result"` with `message.subtype === "success"` -- parse `message.structured_output` with `CodeQualityReportSchema` and return it
 
 ## Run
 
@@ -129,13 +94,3 @@ npm start
 - [ ] `issues.js` and `errors.js` have issues detected with correct severity
 - [ ] Each report includes `filename`, `qualityScore`, `issues`, `summary`, `categories`, `recommendations`
 - [ ] MCP server connection confirmed before analysis
-
-## MCP Tool
-
-| Tool | Description |
-|------|-------------|
-| `mcp__eslint__lint` | Lint JavaScript files using ESLint |
-
-## Key Takeaway
-
-MCP servers connect agents to external tools via a standardized protocol. Use the async generator input mode for streaming compatibility, check the `init` message for server status, and combine with `outputFormat` for type-safe structured results.

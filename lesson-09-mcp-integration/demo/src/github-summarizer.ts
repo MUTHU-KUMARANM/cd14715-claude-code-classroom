@@ -63,10 +63,7 @@ export async function summarizeGitHubFile(
   repo: string,
   path: string
 ): Promise<GitHubFileSummary> {
-
-
   console.log(`Summarizing file from GitHub - ${owner}/${repo}/${path}`);
-
 
   const userMessage = `You have access to GitHub via MCP.
 
@@ -137,6 +134,4 @@ export async function summarizeGitHubFile(
   }
 
   throw new Error("Error occured. Could not summarize GitHub file.");
-
-
 }

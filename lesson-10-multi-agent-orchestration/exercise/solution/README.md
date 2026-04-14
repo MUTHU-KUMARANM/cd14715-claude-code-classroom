@@ -1,19 +1,15 @@
-# Exercise: Multi-Agent Orchestration - Sales Opportunity Qualifier
-
-Coordinate specialized subagents for comprehensive sales qualification.
-
-## Scenario
-
-Your B2B SaaS sales team receives 200+ inbound leads weekly. Build an intelligent system that uses subagents to research prospects, analyze competitive position, and assess qualification criteria automatically.
+# Solution: Multi-Agent Orchestration - Sales Opportunity Qualifier
 
 ## Project Structure
 
 ```
-exercise/
+solution/
 ├── src/
-│   ├── sales-qualifier.ts    # Exported function (deliverable)
+│   ├── sales-qualifier.ts    # Completed implementation
 │   ├── sample-prospects.ts   # Test data
-│   └── index.ts              # Test
+│   └── index.ts              # Test runner
+├── .env.example              # Environment template
+├── package.json
 └── README.md
 ```
 
@@ -50,87 +46,14 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Deliverable: sales-qualifier.ts
+## What You'll See
 
-```typescript
-export async function qualifyOpportunity(
-  companyName: string,
-  contactInfo: ContactInfo
-): Promise<SalesBriefing>
-```
-
-## Key Pattern: Subagents with Structured Output
-
-```typescript
-// Define subagents inline
-const subagents = {
-  "company-researcher": {
-    description: "Research specialist that gathers company intelligence",
-    prompt: "You are a company research specialist...",
-    tools: ["WebSearch"],
-    model: "sonnet",
-  },
-  "competitive-analyzer": {
-    description: "Analyst that compares prospect's solution to ours",
-    prompt: "You are a competitive analysis specialist...",
-    tools: [],
-    model: "sonnet",
-  },
-  "qualification-scorer": {
-    description: "Scorer that assesses BANT criteria and deal probability",
-    prompt: "You are a sales qualification specialist...",
-    tools: [],
-    model: "sonnet",
-  },
-};
-
-// Orchestrator invokes subagents and returns structured output
-for await (const message of query({
-  prompt: orchestratorPrompt,
-  options: {
-    allowedTools: ["Task"],
-    agents: subagents,
-    outputFormat: {
-      type: "json_schema",
-      schema: SalesBriefingJSONSchema,
-    },
-  },
-})) { ... }
-```
-
-## Architecture
-
-```
-PROSPECT: Company + Contact
-     ↓
-ORCHESTRATOR (allowedTools: ["Task"])
-     ↓
-     ├─→ company-researcher (WebSearch) ─→ Profile ──┐
-     ├─→ competitive-analyzer ───────────→ Position ─┤
-     └─→ qualification-scorer ───────────→ BANT ─────┤
-                                                      ↓
-                                                SALES BRIEFING
-```
-
-## Output Schema
-
-| Field | Description |
-|-------|-------------|
-| companyProfile | Name, industry, employees, revenue, tech stack |
-| competitiveAnalysis | Current solution, advantages, concerns |
-| qualification | Budget, authority, need, timeline, deal size |
-| recommendation | Pursue, Nurture, or Disqualify |
-| talkingPoints | Key points for the sales call |
-
-## Sample Prospects
-
-| Type | Company | Expected Outcome |
-|------|---------|------------------|
-| Enterprise | TechCorp Industries | Pursue (high budget) |
-| Startup | GrowthStartup Inc | Nurture (limited budget) |
-| SMB | LocalBiz Solutions | Pursue (moderate budget) |
+1. The orchestrator invokes the **company-researcher** subagent to gather company intelligence via web search
+2. The **competitive-analyzer** subagent assesses the prospect's competitive position
+3. The **qualification-scorer** subagent evaluates BANT criteria and calculates deal metrics
+4. Console output shows each subagent invocation with elapsed time
+5. A structured sales briefing with company profile, competitive analysis, BANT qualification, recommendation, and talking points
 
 ## Key Takeaway
 
 Combine the subagents pattern with structured outputs to create comprehensive business intelligence systems. The orchestrator coordinates multiple specialists via `Task`, and returns validated structured data via `outputFormat`.
-

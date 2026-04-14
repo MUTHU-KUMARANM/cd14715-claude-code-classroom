@@ -69,7 +69,7 @@ export const CodeQualityReportJSONSchema = zodToJsonSchema(CodeQualityReportSche
 });
 
 // -----------------------------------------------------------------------------
-// TODO 1: Implement async generator input mode
+// TODO: Step 1 - Implement async generator input mode
 // This is the recommended pattern for MCP/streaming compatibility
 // -----------------------------------------------------------------------------
 
@@ -118,10 +118,9 @@ ANALYSIS REQUIREMENTS:
 
 Return the complete quality report in the structured JSON format.`;
 
-  // TODO 2: Call the query function 
+  // TODO: Step 2 - Call the query function
 
-  //
-  // TODO 3: Handle the message stream:
+  // TODO: Step 3 - Handle the message stream:
   // - Check for "init" message to verify MCP server connection status
   // - Log tool use events (when message.type === "assistant")
   // - Return the result when message.type === "result" && message.subtype === "success"

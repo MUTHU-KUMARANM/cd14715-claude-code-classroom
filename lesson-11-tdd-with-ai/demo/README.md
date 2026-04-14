@@ -1,75 +1,60 @@
 # Demo: AI-Accelerated Test-Driven Development
 
-**Estimated Time: 8 minutes**
-
-## Overview
-
-Explore how AI agents transform the TDD workflow. Claude generates comprehensive test suites from requirements, iterates through red-green-refactor cycles, and provides coverage analysis.
-
 ## Scenario
 
-Building a **user authentication module** with:
-- Email/password validation
-- Password hashing
-- JWT token generation
-- Rate limiting (account lockout after failed attempts)
+You are building a **user authentication module** using TDD with AI assistance. Claude Code generates a comprehensive test suite from natural language requirements, then you implement the code to pass those tests following the red-green-refactor cycle.
+
+The authentication module includes:
+- Email/password validation with Zod schemas
+- Password hashing with salted SHA-256
+- JWT-like token generation and verification
+- Rate limiting with account lockout after failed attempts
 
 ## Project Structure
 
 ```
-src/
-├── auth.ts           # Authentication module
-├── auth.test.ts      # AI-generated test suite (30+ tests)
-└── index.ts          # Demo runner
+demo/
+├── src/
+│   ├── auth.ts           # Authentication module (implementation)
+│   ├── auth.test.ts      # AI-generated test suite (30+ tests)
+│   └── index.ts          # Demo runner
+├── .env.example
+├── package.json
+└── tsconfig.json
 ```
 
-## AI-Accelerated TDD Workflow
+## Setup
 
+```bash
+npm install
 ```
-1. Define Requirements (natural language)
-         ↓
-2. AI Generates Test Suite
-         ↓
-3. Red Phase (observe failures)
-         ↓
-4. Green Phase (implement to pass)
-         ↓
-5. Refactor (AI suggestions)
-         ↓
-6. Coverage Analysis & Iterate
+
+## Authentication Setup
+
+In Vocareum workspace, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and other required variables are **already configured** -- no setup needed.
+
+For local development:
+
+```bash
+export ANTHROPIC_API_KEY=your-key-here
+export ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
 ## Run
 
 ```bash
-npm install
-npm start           # Run demo
-npm test            # Run tests
-npm run test:coverage
+npm start              # Run the demo
+npm test               # Run all tests
+npm run test:coverage  # Run tests with coverage report
 ```
 
-## Key Prompts for Claude Code
+## What You'll See
 
-**Generate tests:**
-```
-Generate Vitest tests for a user authentication module that validates
-email format, enforces password strength, hashes passwords, and issues
-JWT tokens. Include edge cases and error scenarios.
-```
+1. **Registration** -- validates email format and password strength, then creates a user with a hashed password
+2. **Weak password rejections** -- demonstrates how AI-generated tests catch edge cases like short passwords, missing uppercase, and missing numbers
+3. **Login and token flow** -- authenticates a user and issues a JWT-like token
+4. **Rate limiting** -- locks an account after 5 consecutive failed login attempts
 
-**Implement to pass:**
-```
-This test is failing: [paste test]. Implement minimum code to pass.
-```
+## Key Takeaway
 
-**Analyze coverage:**
-```
-Coverage shows these uncovered lines: [paste]. Generate tests to cover them.
-```
-
-## Key Takeaways
-
-1. Natural language requirements enable AI test generation
-2. AI accelerates but doesn't replace human judgment
-3. Red-green-refactor cycle remains essential
-4. Use coverage analysis to identify gaps
+AI accelerates TDD by generating comprehensive test suites from natural language requirements, but human judgment remains essential for identifying business-specific edge cases and validating that generated tests match the actual requirements.

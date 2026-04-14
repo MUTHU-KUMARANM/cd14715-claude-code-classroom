@@ -1,18 +1,16 @@
 # Exercise: Claude Skills - JavaScript Code Reviewer
 
-Build an agent that reviews JavaScript files using a Claude Skill.
+## Objective
 
-## Learning Objectives
+Build an agent that reviews JavaScript files using a Claude Skill, combining skill-based analysis with structured outputs for type-safe results.
+
+## Learning Goals
 
 After completing this exercise, you will be able to:
 1. Load Claude Skills from `.claude/skills/` using `settingSources`
 2. Combine Skills with Structured Outputs for type-safe results
 3. Use Zod schemas with `zodToJsonSchema()` for API compatibility
 4. Handle structured output validation and errors
-
-## Scenario
-
-Your team needs consistent code reviews across projects. Build an agent that uses a JavaScript code review skill to analyze files for quality issues, bugs, and security vulnerabilities.
 
 ## Project Structure
 
@@ -57,7 +55,7 @@ ANTHROPIC_BASE_URL=your-base-url-here
 - **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
 - **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
-## Tasks
+## Your Tasks
 
 Complete the TODOs in `src/js-reviewer.ts`:
 
@@ -133,29 +131,3 @@ When complete, running `npm start` should output:
 - Quality score (0-100)
 - List of issues with line numbers, severity, and suggestions
 - Recommendations for improvement
-
-## Skill: js-code-review
-
-The provided skill teaches the agent to check for:
-
-| Category | Issues |
-|----------|--------|
-| Quality | `var` usage, console.log, unused variables |
-| Bugs | Loose equality `==`, missing await, null access |
-| Security | eval(), innerHTML, hardcoded secrets |
-| Style | Arrow functions, destructuring, async/await |
-
-## Key Concepts
-
-1. **Skills Location**: `.claude/skills/<skill-name>/SKILL.md`
-2. **Skill Discovery**: Claude uses the `description` in YAML frontmatter
-3. **Loading Skills**: `settingSources: ["project"]` loads from `.claude/`
-4. **Skill Tool**: `allowedTools: ["Skill", ...]` enables skill invocation
-5. **Structured Output**: `outputFormat` + Zod validation for type safety
-
-## Hints
-
-- Look at the demo's `email-reviewer.ts` for the complete pattern
-- The SKILL.md is already provided with YAML frontmatter
-- Use `zodToJsonSchema()` with `{ $refStrategy: "root" }` to inline $ref definitions
-- Handle both success and error result subtypes

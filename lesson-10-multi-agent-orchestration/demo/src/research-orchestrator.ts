@@ -63,8 +63,7 @@ function createResearchAgent(options: AgentFactoryOptions = {}): AgentDefinition
             Focus on credible, recent sources. Be thorough but concise.`,
     // Use model strings: 'sonnet', 'haiku', or 'opus'
     model: options.modelOverride || "haiku",
-    tools: ['WebSearch']
-
+    tools: ['WebSearch'],
   };
 }
 

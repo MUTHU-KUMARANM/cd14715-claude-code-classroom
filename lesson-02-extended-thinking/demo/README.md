@@ -1,17 +1,17 @@
 # Demo: Extended Thinking for Root Cause Analysis
 
-Learn how extended thinking improves complex multi-step analysis.
+Learn how extended thinking improves complex multi-step analysis by providing transparent reasoning trails.
 
 ## Scenario
 
-An e-commerce platform has a sudden drop in checkout conversions. The ops team needs to investigate the root cause by correlating logs, changes, and user reports.
+An e-commerce platform has a sudden drop in checkout conversions. The ops team needs to investigate the root cause by correlating logs, deployment changes, and user reports. Extended thinking lets stakeholders see exactly how Claude reasons through the evidence.
 
 ## Project Structure
 
 ```
 src/
-├── incident-analyzer.ts  # Exported function
-├── sample-incidents.ts   # Test data
+├── incident-analyzer.ts  # Exported function: analyzeIncident()
+├── sample-incidents.ts   # Test data with different incident types
 └── index.ts              # Tests for the function
 ```
 
@@ -48,37 +48,13 @@ ANTHROPIC_BASE_URL=your-base-url-here
 npm start
 ```
 
-## Exported Function: incident-analyzer.ts
-
-```typescript
-export interface IncidentAnalysis {
-   analysis: string;          // The final text response
-   thinkingSteps: string[];   // Captured reasoning for audit trail
-}
-
-export async function analyzeIncident(
-  incidentReport: string
-): Promise<IncidentAnalysis>
-```
-
-## Tests (index.ts)
+## What You'll See
 
 | Step | Description |
 |------|-------------|
-| 1 | Baseline: analysis WITHOUT extended thinking |
-| 2 | Test `analyzeIncident()` on checkout drop |
-| 3 | Test audit trail extraction for stakeholders |
-| 4 | Test all incidents |
-
-## Budget Guidelines
-
-| Task Type | Budget |
-|-----------|--------|
-| Quick triage | 5,000 tokens |
-| Root cause analysis | 10,000-15,000 tokens |
-| Complex investigations | 15,000-20,000 tokens |
+| 1 | Baseline analysis WITHOUT extended thinking — only a final answer, no reasoning trail |
+| 2 | Analysis WITH extended thinking — full root cause analysis plus captured thinking steps |
 
 ## Key Takeaway
 
-Extended thinking provides transparent reasoning that can be audited and explained to stakeholders. Use it for complex analysis where decisions have significant impact.
-
+Extended thinking provides transparent reasoning that can be audited and explained to stakeholders. Use it for complex analysis where decisions have significant impact and you need to show your work.

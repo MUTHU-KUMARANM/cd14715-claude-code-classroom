@@ -1,8 +1,6 @@
 # Solution: Evaluating Agentic Systems - Sentiment Analysis
 
-Complete solution with all evaluators implemented.
-
-## Architecture
+## Project Structure
 
 ```
 src/
@@ -12,6 +10,12 @@ src/
 ├── index.ts             # Evaluation runner
 └── evaluators/
     └── index.ts         # 3 evaluators implemented
+```
+
+## Setup
+
+```bash
+npm install
 ```
 
 ## Authentication Setup
@@ -36,12 +40,12 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ## Run
 
 ```bash
-# From this directory (lesson-12-evaluating-agents/exercise/solution)
-npm install
 npm start    # Run sentiment agent with evaluations
 ```
 
-## Evaluators Implemented
+## What You'll See
+
+The solution runs 5 test cases through the sentiment agent. Each is assessed by three evaluators:
 
 | Evaluator | What It Checks | Scoring |
 |-----------|----------------|---------|
@@ -49,28 +53,8 @@ npm start    # Run sentiment agent with evaluations
 | **Schema Validity** | Output matches SentimentAnalysisSchema | 0-1 based on field validity |
 | **Accuracy** | Detected sentiment matches expected | 1=match, 0.5=neutral, 0=opposite |
 
-## Key Patterns
+Output includes per-test evaluator results, overall scores, and a summary with per-evaluator pass rates.
 
-### Agent Trace Capture
-```typescript
-export interface AgentTrace {
-  toolCalls: Array<{ name: string; input: Record<string, unknown> }>;
-  result: SentimentAnalysis | null;
-}
-```
+## Key Takeaway
 
-### Evaluator Structure
-```typescript
-export interface EvaluatorResult {
-  name: string;
-  passed: boolean;
-  score: number; // 0 to 1
-  details: string;
-}
-```
-
-### Running Evaluators
-```typescript
-const report = runEvaluators(trace, testCase);
-// report.overallPassed, report.overallScore
-```
+Agent evaluation follows a consistent pattern: capture a trace of agent behavior (tool calls and structured output), then run evaluators that check correctness at multiple levels -- tool usage, output schema conformance, and result accuracy. Partial credit scoring enables nuanced assessment beyond simple pass/fail.

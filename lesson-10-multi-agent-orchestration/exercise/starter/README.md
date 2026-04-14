@@ -1,7 +1,5 @@
 # Exercise: Multi-Agent Orchestration - Sales Opportunity Qualifier
 
-Coordinate specialized subagents for comprehensive sales qualification.
-
 ## Objective
 
 Complete `src/sales-qualifier.ts` to implement `qualifyOpportunity()`, which uses an orchestrator agent to coordinate three specialized subagents (researcher, analyzer, scorer) and produce a structured sales briefing.
@@ -16,10 +14,14 @@ Complete `src/sales-qualifier.ts` to implement `qualifyOpportunity()`, which use
 ## Project Structure
 
 ```
-src/
-├── sales-qualifier.ts    # YOUR IMPLEMENTATION (has TODOs)
-├── sample-prospects.ts   # Test data (provided)
-└── index.ts              # Test runner (do not modify)
+starter/
+├── src/
+│   ├── sales-qualifier.ts    # Your implementation (has TODOs)
+│   ├── sample-prospects.ts   # Test data (provided)
+│   └── index.ts              # Test runner (do not modify)
+├── .env.example              # Environment template
+├── package.json
+└── README.md
 ```
 
 ## Setup
@@ -54,76 +56,30 @@ Complete the four TODOs in `src/sales-qualifier.ts`:
 
 ### TODO 1: Implement `generateMessages()` async generator
 
-Required for streaming compatibility with subagents:
-
-```typescript
-async function* generateMessages(userMessage: string) {
-  yield {
-    type: "user" as const,
-    message: { role: "user" as const, content: userMessage },
-    parent_tool_use_id: null,
-    session_id: "sales-qualifier-session",
-  };
-}
-```
+Yield a single user message object with `type`, `message`, `parent_tool_use_id`, and `session_id` fields. See the demo's `research-orchestrator.ts` for the pattern.
 
 ### TODO 2: Fill in the subagent definitions
 
-Each subagent in the `subagents` object needs a `description` and `prompt`. The structure is already in place — add meaningful values:
+Each subagent in the `subagents` object needs a `description` and `prompt`. The structure is already in place — add meaningful values for each agent's role:
 
-```typescript
-"company-researcher": {
-  description: "Research specialist that gathers company intelligence",
-  prompt: "You are a company research specialist. Gather: company size, industry, tech stack, recent news, estimated revenue.",
-  tools: ["WebSearch"],
-  model: "sonnet",
-},
-```
-
-Do the same for `"competitive-analyzer"` and `"qualification-scorer"`.
+- `"company-researcher"`: Needs a description and prompt about gathering company intelligence (size, industry, tech stack, news). Also needs the right tool.
+- `"competitive-analyzer"`: Needs a description and prompt about analyzing competitive positioning.
+- `"qualification-scorer"`: Needs a description and prompt about assessing BANT criteria (Budget, Authority, Need, Timeline).
 
 ### TODO 3: Call `query()` with subagents
 
-Use the orchestrator prompt and register the subagents:
-
-```typescript
-for await (const message of query({
-  prompt: generateMessages(orchestratorPrompt),
-  options: {
-    allowedTools: ["Task"],
-    agents: subagents,
-    model: "sonnet",
-    outputFormat: {
-      type: "json_schema",
-      schema: SalesBriefingJSONSchema,
-    },
-    maxTurns: 15,
-  },
-})) {
-  // handle messages (TODO 4)
-}
-```
+Wire up the `query()` call with:
+- `prompt`: Use the async generator with the orchestrator prompt
+- `allowedTools`: `["Task"]` so the orchestrator can invoke subagents
+- `agents`: Pass the subagents record
+- `outputFormat`: Use `json_schema` with `SalesBriefingJSONSchema`
+- `maxTurns`: 15
 
 ### TODO 4: Handle the message stream
 
-```typescript
-// Log Task invocations
-if (message.type === "assistant") {
-  const content = message.message?.content;
-  if (Array.isArray(content)) {
-    for (const block of content) {
-      if (block.type === "tool_use" && block.name === "Task") {
-        console.log(`[Subagent]: ${JSON.stringify(block.input)}`);
-      }
-    }
-  }
-}
-
-// Return structured result
-if (message.type === "result" && message.subtype === "success" && message.structured_output) {
-  return SalesBriefingSchema.parse(message.structured_output);
-}
-```
+Inside the `for await` loop:
+- Log Task tool invocations when `block.type === "tool_use"` and `block.name === "Task"`
+- Return `SalesBriefingSchema.parse(message.structured_output)` when the result is a success
 
 ## Run
 
@@ -137,22 +93,4 @@ npm start
 - [ ] All 3 sample prospects are qualified (TechCorp, GrowthStartup, LocalBiz)
 - [ ] Each briefing includes `companyProfile`, `competitiveAnalysis`, `qualification`, `recommendation`, `talkingPoints`
 - [ ] Task tool invocations are logged showing subagent calls
-- [ ] TechCorp → "Pursue", GrowthStartup → "Nurture" or "Pursue", LocalBiz → "Pursue"
-
-## Architecture
-
-```
-qualifyOpportunity(company, contact)
-     ↓
-ORCHESTRATOR (allowedTools: ["Task"])
-     ↓
-     ├─→ company-researcher (WebSearch) ─→ Profile ──┐
-     ├─→ competitive-analyzer ───────────→ Position ─┤
-     └─→ qualification-scorer ───────────→ BANT ─────┤
-                                                      ↓
-                                                SALES BRIEFING
-```
-
-## Key Takeaway
-
-The `agents` parameter registers subagents, and `Task` in `allowedTools` lets the orchestrator invoke them. Each subagent runs independently with its own tools and model — the orchestrator coordinates their outputs into a final result.
+- [ ] TechCorp -> "Pursue", GrowthStartup -> "Nurture" or "Pursue", LocalBiz -> "Pursue"

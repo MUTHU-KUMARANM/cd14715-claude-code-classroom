@@ -2,11 +2,17 @@
 
 **Estimated Time: 15 minutes**
 
-## Overview
+## Objective
 
-Build evaluators to assess a sentiment analysis agent. The agent and tool are provided - your task is to implement three evaluators that verify the agent's behavior.
+Build evaluators to assess a sentiment analysis agent. The agent and tool are provided -- your task is to implement three evaluators that verify the agent's behavior.
 
-## Architecture
+## Learning Goals
+
+- Implement evaluators that check tool usage, schema validity, and output accuracy
+- Use Zod's `safeParse()` to validate agent output against a schema
+- Apply partial credit scoring for nuanced evaluation results
+
+## Project Structure
 
 ```
 src/
@@ -16,6 +22,12 @@ src/
 ├── index.ts             # Evaluation runner (provided)
 └── evaluators/
     └── index.ts         # YOUR IMPLEMENTATION
+```
+
+## Setup
+
+```bash
+npm install
 ```
 
 ## Authentication Setup
@@ -37,34 +49,38 @@ ANTHROPIC_BASE_URL=your-base-url-here
 - **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
 - **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
 
-## Run
-
-```bash
-# From this directory (lesson-12-evaluating-agents/exercise/starter)
-npm install
-npm start    # Runs agent + evaluations (will show "Not implemented" until you complete the TODOs)
-```
-
 ## Your Tasks
 
 Implement three evaluators in `src/evaluators/index.ts`:
 
 ### 1. Tool Call Evaluator
+
 Verify the agent called the correct tool with proper parameters.
-- Check if `mcp__sentiment-analyzer__analyze_sentiment` was called
-- Verify the `text` parameter was provided
+
+```typescript
+// Check if mcp__sentiment-analyzer__analyze_sentiment was called
+// Verify the text parameter was provided
+// Return score: 0 = no calls, 0.25 = wrong tool, 0.5 = missing text, 1 = correct
+```
 
 ### 2. Schema Validity Evaluator
+
 Verify the output matches the Zod schema.
-- Use `SentimentAnalysisSchema.safeParse()` to validate
-- Check all required fields: text, sentiment, confidence, keywords, explanation
+
+```typescript
+// Use SentimentAnalysisSchema.safeParse() to validate
+// Check all required fields: text, sentiment, confidence, keywords, explanation
+// Return score = valid fields / total fields
+```
 
 ### 3. Accuracy Evaluator
-Verify the detected sentiment matches the expected value.
-- Compare `result.sentiment` with `testCase.expectedSentiment`
-- Give partial credit for "neutral" when expecting positive/negative
 
-## Evaluator Interface
+Verify the detected sentiment matches the expected value.
+
+```typescript
+// Compare result.sentiment with testCase.expectedSentiment
+// Score: 1 = exact match, 0.5 = neutral when expecting positive/negative, 0 = opposite
+```
 
 Each evaluator returns:
 ```typescript
@@ -76,20 +92,15 @@ interface EvaluatorResult {
 }
 ```
 
-## Test Cases
+## Run
 
-| Text | Expected Sentiment |
-|------|-------------------|
-| "I absolutely love this product!" | positive |
-| "This is terrible. Complete waste." | negative |
-| "The product arrived on time." | neutral |
-| "Amazing quality! Highly recommend!" | positive |
-| "Broke after one day." | negative |
+```bash
+npm start    # Runs agent + evaluations (will show "Not implemented" until you complete the TODOs)
+```
 
 ## Success Criteria
 
-When your evaluators are complete:
-- All 5 test cases should run
-- Tool Call Evaluator should pass for each
-- Schema Validity Evaluator should pass for each
-- Accuracy Evaluator should pass for each (agent correctly classifies sentiment)
+- All 5 test cases run through the agent
+- Tool Call Evaluator passes for each test case
+- Schema Validity Evaluator passes for each test case
+- Accuracy Evaluator passes for each test case (agent correctly classifies sentiment)

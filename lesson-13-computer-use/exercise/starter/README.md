@@ -1,32 +1,74 @@
-# Lesson 13 Exercise: Form Automation Agent
+# Exercise: Form Automation Agent
 
-In this exercise, you'll implement a form automation agent using Claude's computer use capabilities. The agent will fill out a web form by clicking fields, typing text, and submitting the form.
+Implement a form automation agent using Claude's computer use capabilities. The agent fills out a web form by clicking fields, typing text, and submitting.
 
-## Learning Objectives
+## Objective
+
+Open `src/form-agent.ts` and implement the TODOs to configure the computer use tool and build the agent loop.
+
+## Learning Goals
 
 - Configure the computer use tool with proper type and dimensions
 - Implement the agent loop for GUI automation
 - Handle different tool result types (screenshots vs text)
 - Apply the conversation pattern for multi-turn tool use
 
-## Your Task
+## Project Structure
 
-Open `src/form-agent.ts` and implement the following TODOs:
+```
+src/
+├── index.ts           # Entry point (no changes needed)
+├── form-agent.ts      # YOUR IMPLEMENTATION HERE
+├── action-handlers.ts # Pre-built action execution
+└── types.ts           # Type definitions
+```
 
-### TODO 1: `createComputerTool()`
+## Setup
+
+```bash
+npm install
+```
+
+## Authentication Setup
+
+Copy `.env.example` to `.env` (required in all environments):
+```bash
+cp .env.example .env
+```
+
+In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment -- the `.env` file only needs to provide `ANTHROPIC_MODEL`.
+
+For local development, also uncomment and fill in your credentials in `.env`:
+```
+ANTHROPIC_API_KEY=your-key-here
+ANTHROPIC_BASE_URL=your-base-url-here
+```
+
+**Troubleshooting:**
+- **`Error: ANTHROPIC_MODEL is not set`** -- make sure you ran `cp .env.example .env`
+- **`Error: API key not found`** -- in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
+
+## Your Tasks
+
+### TODO: (1) `createComputerTool()`
 
 Return a `ComputerUseTool` object with:
-- `type`: Must be exactly `"computer_20250124"`
-- `name`: Must be `"computer"`
-- `display_width_px`: Use `DISPLAY_WIDTH` constant
-- `display_height_px`: Use `DISPLAY_HEIGHT` constant
 
-### TODO 2: `runFormAutomationAgent()`
+```typescript
+{
+  type: "computer_20250124",
+  name: "computer",
+  display_width_px: DISPLAY_WIDTH,
+  display_height_px: DISPLAY_HEIGHT,
+}
+```
 
-Implement the agent loop:
+### TODO: (2) `runFormAutomationAgent()`
 
-#### TODO 2a: Make the API Call
+#### (2a) Make the API call
+
 Call `client.beta.messages.create` with:
+
 ```typescript
 {
   model: "claude-sonnet-4-5-20250929",
@@ -34,14 +76,14 @@ Call `client.beta.messages.create` with:
   system: systemPrompt,
   tools: tools as Anthropic.Beta.BetaTool[],
   messages,
-  betas: ["computer-use-2025-01-24"],  // Required for computer use!
+  betas: ["computer-use-2025-01-24"],
 }
 ```
 
-#### TODO 2b: Format Tool Results
-When processing actions, format the result based on type:
+#### (2b) Format tool results
 
 For screenshots (when `result.screenshot` exists):
+
 ```typescript
 {
   type: "tool_result",
@@ -58,6 +100,7 @@ For screenshots (when `result.screenshot` exists):
 ```
 
 For other actions:
+
 ```typescript
 {
   type: "tool_result",
@@ -67,67 +110,25 @@ For other actions:
 }
 ```
 
-#### TODO 2c: Append Messages
+#### (2c) Append messages
+
 Add both the assistant response and tool results to continue the conversation:
+
 ```typescript
 messages.push({ role: "assistant", content: response.content });
 messages.push({ role: "user", content: toolResults });
 ```
 
-## Authentication Setup
-
-Copy `.env.example` to `.env` (required in all environments):
-```bash
-cp .env.example .env
-```
-
-In Vocareum workspace, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` are **already configured** in your environment — the `.env` file only needs to provide `ANTHROPIC_MODEL`.
-
-For local development, also uncomment and fill in your credentials in `.env`:
-```
-ANTHROPIC_API_KEY=your-key-here
-ANTHROPIC_BASE_URL=your-base-url-here
-```
-
-**Troubleshooting:**
-- **`Error: ANTHROPIC_MODEL is not set`** — make sure you ran `cp .env.example .env`
-- **`Error: API key not found`** — in Vocareum this is pre-configured; locally, set `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` in `.env`
-
-## Getting Started
+## Run
 
 ```bash
-# From this directory (lesson-13-computer-use/exercise/starter)
-# Install dependencies
-npm install
-
-# Copy environment file (if not already done)
-cp .env.example .env
-
-# Run (will show demo mode if no API key)
 npm start
 ```
 
-## Hints
+## Success Criteria
 
-1. The `betas` array is required for computer use - without it, the API won't recognize the computer tool
-2. Screenshots must be returned as image content for Claude to "see" the result
-3. The agent loop continues until `stop_reason === "end_turn"` or no tool calls are made
-4. Always push both the assistant response and tool results to maintain conversation context
-
-## Expected Behavior
-
-When complete, running `npm start` should:
-1. Display the configuration
-2. Start the agent loop
-3. Show each action being executed
-4. Report the final result with action count
-
-## Files
-
-```
-src/
-├── index.ts          # Entry point (no changes needed)
-├── form-agent.ts     # YOUR IMPLEMENTATION HERE
-├── action-handlers.ts # Pre-built action execution
-└── types.ts          # Type definitions
-```
+- `createComputerTool()` returns a valid tool with type `"computer_20250124"`
+- Agent loop calls the API with the `computer-use-2025-01-24` beta
+- Screenshots are returned as base64 image content
+- Other action results are returned as text content
+- Both assistant response and tool results are appended to messages each iteration

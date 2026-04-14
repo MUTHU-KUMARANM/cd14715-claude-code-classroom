@@ -68,12 +68,10 @@ async function validateApiResponse(
     //   - headers: merge "Content-Type": "application/json" with optional headers
     //   - body: include body only for POST/PUT requests
 
-
     // TODO: Step 2 - Make the fetch request and capture:
     //   - response from fetch(apiUrl, fetchOptions)
     //   - statusCode from response.status
     //   - latencyMs = Date.now() - start
-
 
     const latencyMs = Date.now() - start; // Remove this line after implementing Step 2
 
@@ -81,27 +79,22 @@ async function validateApiResponse(
     //   - Use try/catch around response.json()
     //   - If parsing fails, push "Response is not valid JSON" to schemaErrors
 
-
     // TODO: Step 4 - Check for missing expected fields
     //   - Get responseFields = Object.keys(responseData)
     //   - For each expectedField not in responseFields:
     //     push `Missing required field: ${field}` to breakingChanges
 
-
     // TODO: Step 5 - Check for extra fields (potential data leakage)
     //   - Find fields in response that are NOT in expectedFields
     //   - If any exist, push warning: `Unexpected fields in response: ${extraFields.join(", ")}`
-
 
     // TODO: Step 6 - Check HTTP status code
     //   - If statusCode < 200 or statusCode >= 300:
     //     push `HTTP error: ${statusCode}` to schemaErrors
 
-
     // TODO: Step 7 - Check performance against SLA
     //   - exceedsSLA = latencyMs > maxLatencyMs
     //   - If exceeds, push warning about response time
-
 
     // TODO: Step 8 - Return ValidationResult object with all fields:
     //   - success: true if statusCode is 2xx AND no breakingChanges

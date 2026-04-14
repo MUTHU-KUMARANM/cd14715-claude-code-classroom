@@ -34,15 +34,12 @@ async function testWithThinking() {
   console.log("📊 Analysis:");
   console.log(result.analysis);
 
-
   console.log(`💭 Thinking steps captured:`);
 
-  //TODO: show thinking steps for full audit trail
+  // TODO: show thinking steps for full audit trail
 
   console.log("\n✅ Extended thinking provides audit trail for compliance!");
 }
-
-
 
 // -----------------------------------------------------------------------------
 // Main
@@ -55,7 +52,7 @@ async function main() {
   console.log("=".repeat(60));
 
   // Optional: implement a test without thinking for comparison
-  //TODO: Test without thinking
+  // TODO: Test without thinking
   // await testWithoutThinking()
   await testWithThinking();
 }

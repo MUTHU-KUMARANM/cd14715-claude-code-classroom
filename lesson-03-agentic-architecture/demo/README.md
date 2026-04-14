@@ -1,16 +1,28 @@
-# Designing Agentic Workflows
+# Demo: Designing Agentic Workflows
 
 Learn the fundamental differences between traditional prompt-response systems and agentic systems.
-
-## Overview
-
-This demo explores how to design agents that can use tools, iterate on tasks, and coordinate with other agents to solve complex problems.
 
 ## Scenario
 
 A company wants to automate their customer research process. Instead of a single prompt ("research this company"), they need an agent that can autonomously search the web, analyze findings, follow up on interesting leads, and compile a comprehensive report.
 
-> **Note:** This is a documentation-only lesson. No code execution is required — just read through the concepts and study the `ARCHITECTURE.md` deliverable.
+> **Note:** This is a documentation-only lesson. No code execution is required -- just read through the concepts and study the `ARCHITECTURE.md` deliverable.
+
+## Project Structure
+
+```
+demo/
+├── ARCHITECTURE.md          # Multi-agent company research architecture
+└── diagrams/
+    ├── multi-agent.mmd      # Multi-agent architecture (source)
+    ├── multi-agent.svg      # Multi-agent architecture (rendered)
+    ├── sequence.mmd         # Sequence diagram (source)
+    ├── sequence.svg         # Sequence diagram (rendered)
+    ├── single-agent.mmd     # Single-agent architecture (source)
+    ├── single-agent.svg     # Single-agent architecture (rendered)
+    ├── workflow.mmd          # Workflow diagram (source)
+    └── workflow.svg          # Workflow diagram (rendered)
+```
 
 > **Diagrams:** `ARCHITECTURE.md` displays pre-rendered SVG images from the `diagrams/` folder. To modify a diagram, edit the corresponding `.mmd` source file and re-render with `mmdc`.
 >
@@ -25,43 +37,15 @@ A company wants to automate their customer research process. Instead of a single
 > npx mmdc -i lesson-03-agentic-architecture/demo/diagrams/single-agent.mmd -o lesson-03-agentic-architecture/demo/diagrams/single-agent.svg
 > ```
 
-## What You'll Learn
+## What You'll See
 
-- What makes a system "agentic" (autonomy, tool use, iteration)
-- Common agentic patterns (ReAct, tool use, delegation)
-- When to use single vs. multiple agents
-- How to design clear agent responsibilities
-- Orchestration patterns for multi-agent systems
-
-## Key Concepts
-
-### Non-Agentic vs Agentic
-
-**Non-Agentic:**
-```
-User → Prompt → Claude → Single Response → Done
-```
-
-**Agentic:**
-```
-User → Agent → Tool1 → Agent evaluates → Tool2 → ... → Final Response
-```
-
-### Orchestration Patterns
-
-1. **Sequential Pipeline**: Agent1 → Agent2 → Agent3
-2. **Parallel Processing**: Agents run simultaneously, merge results
-3. **Hierarchical Delegation**: Orchestrator manages sub-orchestrators
-
-## Deliverable
-
-`ARCHITECTURE.md` documenting a multi-agent company research system with:
-- Single vs multi-agent comparison
-- Agent responsibilities and tools
-- Workflow diagram showing parallel execution
-- Pros/cons analysis
+| Concept | Description |
+|---------|-------------|
+| Non-Agentic vs Agentic | How autonomous tool-using agents differ from single-shot prompts |
+| Single-Agent Architecture | One agent handling all research tasks sequentially |
+| Multi-Agent Architecture | Specialized agents (Web Researcher, People Finder, News Analyst) running in parallel |
+| Orchestration Pattern | Parallel-with-merge pattern for coordinating sub-agents |
 
 ## Key Takeaway
 
 Design agents with clear, focused responsibilities. Use single agents for straightforward tasks and multi-agent systems when you need parallelization or specialized expertise.
-

@@ -2,14 +2,11 @@
 
 **Estimated Time: 10 minutes**
 
-## Overview
+## Scenario
 
-Demonstrates how to evaluate an agent using three evaluators:
-1. **Tool Call Evaluator** - Verify the agent called the correct tool with correct parameters
-2. **Schema Validity Evaluator** - Verify output matches the Zod schema
-3. **Calculation Accuracy Evaluator** - Verify the math is correct
+Build evaluators for a tip calculator agent. The agent uses a custom MCP tool to calculate tips, then three evaluators assess its behavior: verifying correct tool usage, schema-valid output, and accurate math.
 
-## Architecture
+## Project Structure
 
 ```
 src/
@@ -19,6 +16,12 @@ src/
 ├── index.ts             # Evaluation runner
 └── evaluators/
     └── index.ts         # 3 evaluators
+```
+
+## Setup
+
+```bash
+npm install
 ```
 
 ## Authentication Setup
@@ -43,48 +46,12 @@ ANTHROPIC_BASE_URL=your-base-url-here
 ## Run
 
 ```bash
-# From this directory (lesson-12-evaluating-agents/demo)
-npm install
 npm start    # Run tip calculator agent with evaluations
 ```
 
-## Key Concepts
+## What You'll See
 
-### Agent Trace Capture
-
-The agent captures tool calls and results for evaluation:
-
-```typescript
-export interface AgentTrace {
-  toolCalls: Array<{ name: string; input: Record<string, unknown> }>;
-  result: TipAnalysis | null;
-}
-```
-
-### Evaluator Structure
-
-Each evaluator returns a standardized result:
-
-```typescript
-interface EvaluatorResult {
-  name: string;      // Evaluator name
-  passed: boolean;   // Did it pass?
-  score: number;     // 0 to 1 (partial credit)
-  details: string;   // Human-readable explanation
-}
-```
-
-### Running Evaluators
-
-```typescript
-const trace = await analyzeTip(bill, tip, split);
-const report = runEvaluators(trace, testCase);
-
-console.log(`Overall Score: ${report.overallScore * 100}%`);
-console.log(`All Passed: ${report.overallPassed}`);
-```
-
-## Evaluators Explained
+The demo runs three test cases through the agent and evaluates each with three evaluators:
 
 | Evaluator | What It Checks | Partial Scores |
 |-----------|----------------|----------------|
@@ -92,7 +59,7 @@ console.log(`All Passed: ${report.overallPassed}`);
 | **Schema Validity** | All Zod fields valid | Score = valid fields / total fields |
 | **Calculation Accuracy** | tip, total, perPerson match expected | Score = correct calcs / 3 |
 
-## Test Cases
+Test cases:
 
 | Bill | Tip % | Split | Expected Tip | Expected Total |
 |------|-------|-------|--------------|----------------|
@@ -100,11 +67,8 @@ console.log(`All Passed: ${report.overallPassed}`);
 | $120 | 20% | 4 | $24.00 | $144.00 |
 | $85.50 | 18% | 2 | $15.39 | $100.89 |
 
+Each test prints evaluator pass/fail status and an overall score percentage, followed by an evaluation summary.
+
 ## Key Takeaway
 
-Evaluators enable systematic assessment of agent behavior. By capturing traces (tool calls + outputs), you can verify:
-- The agent uses tools correctly
-- Outputs conform to schemas
-- Results are accurate
-
-This pattern scales to any agent - define test cases, capture traces, and run evaluators.
+Evaluators enable systematic assessment of agent behavior. By capturing traces (tool calls + outputs), you can verify the agent uses tools correctly, outputs conform to schemas, and results are accurate. This pattern scales to any agent -- define test cases, capture traces, and run evaluators.

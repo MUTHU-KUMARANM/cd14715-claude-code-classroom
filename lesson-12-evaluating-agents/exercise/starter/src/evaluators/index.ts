@@ -39,12 +39,9 @@ export function evaluateToolCall(trace: AgentTrace): EvaluatorResult {
 
   // TODO: Step 1 - Check if any tool was called
 
-
   // TODO: Step 2 - Check if the correct tool was called
 
-
   // TODO: Step 3 - Check if text parameter was provided
-
 
   // TODO: Step 4 - Return success if all checks pass
 
@@ -66,15 +63,11 @@ export function evaluateSchemaValidity(trace: AgentTrace): EvaluatorResult {
 
   // TODO: Step 1 - Check if result exists
 
-
   // TODO: Step 2 - Validate against Zod schema
-
 
   // TODO: Step 3 - Check all required fields are valid
 
-
   // TODO: Step 4 - Return success if all fields valid
-
 
   return {
     name: "Schema Validity Evaluator",
@@ -100,10 +93,7 @@ export function evaluateAccuracy(
 
   // TODO: Step 2 - Compare actual vs expected sentiment
 
-
   // TODO: Step 3 - Return appropriate result based on match
-
-
 
   return {
     name: "Accuracy Evaluator",

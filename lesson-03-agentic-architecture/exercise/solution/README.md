@@ -1,107 +1,43 @@
 # Solution: Multi-Agent Customer Support System
 
-This is the complete solution for the lesson-03 exercise.
+Complete solution for the lesson-03 exercise, demonstrating a multi-agent architecture for intelligent ticket routing.
 
-## What This Solution Demonstrates
+## Project Structure
 
-### Architecture Design
-- **Multi-agent approach** with 6 specialized agents:
-  - Triage Agent (entry point, categorization)
-  - Technical Agent (analyzes bugs, API issues)
-  - Billing Agent (handles payments, refunds)
-  - Knowledge Base Agent (searches for existing solutions)
-  - Routing Agent (makes final routing decision)
-  - Escalation Agent (background SLA monitoring)
-
-### Diagrams Included
-
-Diagrams are pre-rendered SVGs in the `diagrams/` folder. Source `.mmd` files are included for reference or modification.
-
-**Rendering Diagrams:**
-The `@mermaid-js/mermaid-cli` package is installed at the project root. To re-render after editing a source file, run from the project root:
-```bash
-npx mmdc -i lesson-03-agentic-architecture/exercise/solution/diagrams/<name>.mmd -o lesson-03-agentic-architecture/exercise/solution/diagrams/<name>.svg
+```
+exercise/solution/
+├── ARCHITECTURE.md          # Complete multi-agent architecture design
+└── diagrams/
+    ├── multi-agent.mmd      # Multi-agent architecture (source)
+    ├── multi-agent.svg      # Multi-agent architecture (rendered)
+    ├── sequence.mmd         # Sequence diagram (source)
+    ├── sequence.svg         # Sequence diagram (rendered)
+    ├── single-agent.mmd     # Single-agent architecture (source)
+    ├── single-agent.svg     # Single-agent architecture (rendered)
+    ├── sla-monitoring.mmd   # SLA monitoring diagram (source)
+    ├── sla-monitoring.svg   # SLA monitoring diagram (rendered)
+    ├── workflow.mmd          # Workflow diagram (source)
+    └── workflow.svg          # Workflow diagram (rendered)
 ```
 
-Example - render the multi-agent diagram:
-```bash
-npx mmdc -i lesson-03-agentic-architecture/exercise/solution/diagrams/multi-agent.mmd -o lesson-03-agentic-architecture/exercise/solution/diagrams/multi-agent.svg
-```
+> **Diagrams:** To re-render after editing a source file:
+> ```bash
+> mmdc -i diagrams/<name>.mmd -o diagrams/<name>.svg
+> ```
+> `mmdc` is available in the Vocareum workspace. For local use: `npm install -g @mermaid-js/mermaid-cli`
 
-1. **System Architecture Diagram** (`diagrams/multi-agent.mmd`)
-   - Shows all agents and their relationships
-   - Demonstrates parallel execution paths
-   - Color-coded by agent type
+## What You'll See
 
-2. **Workflow Diagram** (`diagrams/workflow.mmd`)
-   - Complete ticket journey from submission to resolution
-   - Decision logic for routing (alt/else conditions)
-   - Parallel analysis stage clearly marked
-   - Four possible outcomes with percentages
+| Component | Description |
+|-----------|-------------|
+| 6 Specialized Agents | Triage, Technical, Billing, Knowledge Base, Routing, Escalation |
+| System Architecture Diagram | All agents, relationships, and parallel execution paths |
+| Workflow Diagram | Complete ticket journey from submission to resolution with decision logic |
+| Sequence Diagram | Timeline of interactions with `par` blocks for parallel execution |
+| SLA Monitoring Diagram | Background escalation agent with continuous monitoring |
+| Failure Mode Analysis | Fallback strategies for each critical component |
+| Performance Estimates | 5-10s processing, 50,000+ daily capacity, 98%+ SLA compliance |
 
-3. **Sequence Diagram** (`diagrams/sequence.mmd`)
-   - Timeline of interactions between components
-   - Parallel execution using `par` blocks
-   - Activation/deactivation of agents
-   - Alternative routing paths using `alt/else`
+## Key Takeaway
 
-4. **SLA Monitoring Diagram** (`diagrams/sla-monitoring.mmd`)
-   - Background escalation agent design
-   - Continuous monitoring approach
-
-### Key Design Decisions
-
-**Parallel Execution**
-- Triage agent spawns Technical, Billing, and Knowledge Base agents simultaneously
-- Speeds up processing from 30-60 seconds to 5-10 seconds
-
-**Model Selection**
-- Haiku for fast operations (Triage, Billing, KB, Routing)
-- Sonnet for complex analysis (Technical Agent)
-
-**Failure Resilience**
-- Fallback strategies for each agent
-- Graceful degradation instead of total failure
-- Dead-man switch for SLA monitoring
-
-**Scalability**
-- Easy to add new agent types (e.g., Sales Agent)
-- Handles 50,000+ tickets daily (10x current volume)
-
-### Performance Estimates
-
-- **Processing time**: 5-10 seconds per ticket (vs 30-60s single agent)
-- **Daily capacity**: 50,000+ tickets (vs 2,500 single agent)
-- **Auto-resolution rate**: 40%
-- **SLA compliance**: 98%+ (vs 70% single agent)
-
-## Learning Outcomes
-
-By studying this solution, you should understand:
-
-1. **How to design specialized agents** with clear, focused responsibilities
-2. **When to use parallel vs sequential** agent execution
-3. **How to create Mermaid diagrams** for system architecture, workflows, and sequences
-4. **How to plan for failure** with fallback strategies
-5. **How to justify architectural decisions** based on requirements
-
-## Comparison to Starter
-
-The starter provides:
-- Problem statement and requirements
-- Option A (single agent) as a reference
-- TODO placeholders for all sections
-
-This solution shows:
-- Complete multi-agent design
-- Professional Mermaid diagrams
-- Comprehensive failure analysis
-- Justified recommendation with metrics
-
-## Next Steps
-
-After reviewing this solution:
-- Compare your design with this approach
-- Identify differences in agent responsibilities
-- Consider which approach better meets the requirements
-- Think about how you'd implement this using the Claude Agent SDK (lessons 5-10)
+High-volume support systems need parallelization and specialization. Multi-agent architectures allow fast triage (Haiku for speed), deep analysis (Sonnet for quality), and graceful degradation when individual agents fail. Design every agent with a single clear responsibility and a fallback path.

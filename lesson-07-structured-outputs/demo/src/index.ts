@@ -13,7 +13,6 @@ import {
 } from "./product-review-analyzer.js";
 import { sampleReviews } from "./sample-reviews.js";
 
-
 // -----------------------------------------------------------------------------
 // Test case: Analyze a positive review
 // -----------------------------------------------------------------------------
@@ -27,13 +26,12 @@ async function analyzePositiveReview() {
 
   const result = await analyzeProductReview(review.text);
   console.log("Structured Output:");
-  console.log(`  Sentiment: ${result.sentiment}`);  
+  console.log(`  Sentiment: ${result.sentiment}`);
   console.log(`  Rating: ${result.rating}/5`);
   console.log(`  Key Points: ${result.keyPoints.join(", ")}`);
   console.log(`  Summary: ${result.summary}`);
   console.log(`  Recommends: ${result.recommendsPurchase}`);
 }
-
 
 // -----------------------------------------------------------------------------
 // Test case: Demonstrate type safety

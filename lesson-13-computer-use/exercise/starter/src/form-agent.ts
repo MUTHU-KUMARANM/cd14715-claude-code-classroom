@@ -31,14 +31,14 @@ const DISPLAY_HEIGHT = parseInt(process.env.DISPLAY_HEIGHT || "768");
 /**
  * Creates the computer use tool configuration.
  *
- * TODO 1: Return a ComputerUseTool object with:
+ * TODO: (1) Return a ComputerUseTool object with:
  * - type: "computer_20250124"
  * - name: "computer"
  * - display_width_px: DISPLAY_WIDTH
  * - display_height_px: DISPLAY_HEIGHT
  */
 export function createComputerTool(): ComputerUseTool {
-  // TODO 1: Implement this function
+  // TODO: (1) Implement this function
   // HINT: The tool type must be exactly "computer_20250124"
   throw new Error("TODO: Implement createComputerTool");
 }
@@ -87,7 +87,7 @@ SAFETY:
 /**
  * Runs the form automation agent.
  *
- * TODO 2: Implement the agent loop that:
+ * TODO: (2) Implement the agent loop that:
  * 1. Calls Claude with the computer use tool
  * 2. Processes tool_use blocks to execute actions
  * 3. Returns screenshots as image content
@@ -132,7 +132,7 @@ export async function runFormAutomationAgent(
       break;
     }
 
-    // TODO 2a: Call Claude with computer use enabled
+    // TODO: (2a) Call Claude with computer use enabled
     // HINT: Use client.beta.messages.create with:
     // - model: "claude-sonnet-4-5-20250929"
     // - max_tokens: 4096
@@ -166,7 +166,7 @@ export async function runFormAutomationAgent(
         const result = await executeAction(action);
         actionsExecuted++;
 
-        // TODO 2b: Format the tool result
+        // TODO: (2b) Format the tool result
         // HINT: If result.screenshot exists, return it as image content:
         // {
         //   type: "tool_result",
@@ -194,7 +194,7 @@ export async function runFormAutomationAgent(
       break;
     }
 
-    // TODO 2c: Add assistant response and tool results to messages
+    // TODO: (2c) Add assistant response and tool results to messages
     // HINT: Push two messages:
     // 1. { role: "assistant", content: response.content }
     // 2. { role: "user", content: toolResults }

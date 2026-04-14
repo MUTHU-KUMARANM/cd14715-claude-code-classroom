@@ -22,7 +22,7 @@ function ensureParsedResponse(response: Message | string): Message {
   return response;
 }
 
-/**Initialize the Anthropic client */
+/** Initialize the Anthropic client */
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });

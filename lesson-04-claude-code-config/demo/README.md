@@ -1,265 +1,59 @@
-# Configuring Claude Code for Multi-Agent Systems
+# Demo: Configuring Claude Code for Multi-Agent Research
 
-Learn how to configure Claude Code using `.claude/CLAUDE.md`, subagents, and skills.
-
-## Overview
-
-This demo shows how to translate the multi-agent architecture from Lesson 03 (Company Research System) into a working Claude Code configuration. You'll learn the practical implementation of agentic design patterns.
+Translate the company research architecture from Lesson 03 into a working `.claude/` configuration with CLAUDE.md, subagents, and skills.
 
 ## Scenario
 
-Implement the company research system from Lesson 03 using Claude Code's configuration features:
-- Set up project-level Claude Code configuration
-- Create specialized subagents with focused responsibilities
-- Define skills that teach domain-specific knowledge
-- Configure tool access and permissions
-
-## What You'll Learn
-
-- **CLAUDE.md**: Project configuration with YAML frontmatter and instructions
-- **Subagents**: Specialized AI assistants with their own context and tools
-- **Skills**: Domain knowledge that Claude automatically applies
-- **Configuration hierarchy**: Project vs user-level settings
-- **Tool restrictions**: Limiting what agents can do for security
-
-## Architecture Implementation
-
-From Lesson 03 design to Lesson 04 implementation:
-
-| Lesson 03 (Design) | Lesson 04 (Implementation) |
-|-------------------|----------------------------|
-| Architecture diagram | `.claude/CLAUDE.md` |
-| Web Researcher Agent | `.claude/agents/web-researcher.md` |
-| People Finder Agent | `.claude/agents/people-finder.md` |
-| Analysis methodology | `.claude/skills/company-analysis/SKILL.md` |
+You are building an AI-powered company research assistant. Instead of writing application code, you configure Claude Code with specialized subagents (web-researcher, people-finder) and a skill (company-analysis) so that a single prompt like `claude "Research Anthropic"` produces a comprehensive report.
 
 ## Project Structure
 
 ```
 demo/
 ├── .claude/
-│   ├── CLAUDE.md                           # Main project configuration
+│   ├── CLAUDE.md                          # Main project configuration
 │   ├── agents/
-│   │   ├── web-researcher.md              # Subagent: Web research
-│   │   └── people-finder.md               # Subagent: People research
+│   │   ├── web-researcher.md              # Subagent: company & product research
+│   │   └── people-finder.md               # Subagent: leadership research
 │   └── skills/
 │       └── company-analysis/
-│           └── SKILL.md                    # Skill: Research methodology
+│           └── SKILL.md                   # Skill: research methodology
+├── src/
+│   └── example.ts                         # Sample code for review demos
 └── README.md
 ```
 
-## File Breakdown
+## Setup
 
-### `.claude/CLAUDE.md` - Project Configuration
-
-**Purpose**: Main configuration that defines:
-- Project description for Claude
-- Available tools
-- How the system works
-- Usage examples
-
-**Key sections**:
-- YAML frontmatter (description, tools)
-- Architecture overview
-- System instructions
-- Usage examples
-
-### `.claude/agents/web-researcher.md` - Subagent
-
-**Purpose**: Specialized agent for web research
-
-**Configuration**:
-- `name`: `web-researcher`
-- `description`: When Claude should use it
-- `tools`: WebFetch, WebSearch, Read, Grep, Glob
-- `model`: Haiku (fast and cost-effective)
-
-**Responsibilities**:
-- Gather company information
-- Extract product details
-- Find tech stack
-- Collect recent news
-
-### `.claude/agents/people-finder.md` - Subagent
-
-**Purpose**: Specialized agent for leadership research
-
-**Configuration**:
-- `name`: `people-finder`
-- `description`: When to find company leaders
-- `tools`: WebFetch, WebSearch, Read, Grep, Glob
-- `model`: Haiku (fast and cost-effective)
-
-**Responsibilities**:
-- Find company founders
-- Identify executive team
-- Research organizational structure
-- Compile leadership information
-
-### `.claude/skills/company-analysis/SKILL.md` - Skill
-
-**Purpose**: Teaches Claude how to conduct company research
-
-**What it teaches**:
-- Research methodology (3 phases)
-- Standard report format
-- Quality checklist
-- Search patterns that work
-- When to delegate to subagents
-
-**How it works**: Claude automatically applies this skill when the user asks to research a company.
-
-## Using the Configuration
-
-### Setup
-
-This demo is read-only (no code to install). The `.claude` folder configures how Claude Code would work if run in this directory.
-
-### Example Usage (Conceptual)
-
-If you were running Claude Code in this directory:
-
-```bash
-# Claude would use the company-analysis skill and delegate to subagents
-claude "Research Anthropic"
-
-# Output would include:
-# 1. Company overview (from web-researcher)
-# 2. Leadership team (from people-finder)
-# 3. Structured report (from company-analysis skill)
-```
-
-### Behind the Scenes
-
-When you ask Claude to research a company:
-
-1. **Skill activates**: `company-analysis` skill loads because description matches
-2. **Claude plans**: Follows the methodology in the skill
-3. **Delegates work**:
-   - Spawns `web-researcher` subagent for company data
-   - Spawns `people-finder` subagent for leadership
-4. **Synthesizes**: Combines results using report format from skill
-5. **Delivers**: Returns comprehensive report to user
-
-## Key Concepts
-
-### CLAUDE.md vs Subagents vs Skills
-
-| Feature | CLAUDE.md | Subagents | Skills |
-|---------|-----------|-----------|--------|
-| **Purpose** | Project setup | Specialized tasks | Domain knowledge |
-| **When used** | Every conversation | Claude delegates | Claude chooses |
-| **Context** | Shared with main | Separate context | Shared with main |
-| **Tools** | Sets defaults | Specific restrictions | Can suggest tools |
-| **Example** | "This is a research project" | "Search the web for company info" | "Here's how to structure a report" |
-
-### YAML Frontmatter
-
-Both CLAUDE.md and agent files use YAML frontmatter:
-
-```yaml
----
-name: agent-name              # Subagents only
-description: "What it does"   # Required for subagents
-tools: Read, Grep, Glob       # Optional
-model: haiku                  # Optional (sonnet, haiku, opus)
----
-```
-
-### Tool Restrictions
-
-Subagents can have limited tools for security:
-
-- **web-researcher**: WebFetch, WebSearch (needs internet access)
-- **code-reviewer** (in other projects): Only Read, Grep, Glob (read-only)
-
-### Model Selection
-
-Choose the right model for each subagent:
-
-- **Haiku**: Fast, cost-effective (web-researcher, people-finder)
-- **Sonnet**: Balanced quality and cost (most tasks)
-- **Opus**: Complex reasoning (rare, expensive)
-
-## Configuration Best Practices
-
-### CLAUDE.md Tips
-
-✅ **Do**:
-- Start with a clear description in YAML frontmatter
-- Include usage examples
-- Document your architecture
-- Link to relevant skills/subagents
-
-❌ **Don't**:
-- Overload with too many instructions (use skills instead)
-- Forget to list available tools
-- Include sensitive information
-
-### Subagent Tips
-
-✅ **Do**:
-- Give each subagent a single, clear purpose
-- Choose the right model (Haiku for simple tasks)
-- Restrict tools to minimum needed
-- Write clear "when to use me" descriptions
-
-❌ **Don't**:
-- Create subagents that do too many things
-- Grant unnecessary tool access
-- Use expensive models for simple tasks
-
-### Skill Tips
-
-✅ **Do**:
-- Teach methodology, not just facts
-- Include examples and templates
-- Use progressive disclosure (link to additional files)
-- Make descriptions specific to trigger correctly
-
-❌ **Don't**:
-- Put everything in one huge SKILL.md
-- Write vague descriptions
-- Include outdated information
+This demo is read-only -- there is no `package.json` and nothing to install. Open the `.claude/` folder and explore the configuration files.
 
 ## Authentication Setup
 
-In Vocareum workspace, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and other required variables are **already configured** in your environment — no setup needed.
+In Vocareum workspace, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and other required variables are **already configured** -- no setup needed.
 
-For local development, set your API key and base URL before running Claude Code:
+For local development:
 
 ```bash
 export ANTHROPIC_API_KEY=your-key-here
 export ANTHROPIC_BASE_URL=your-base-url-here
 ```
 
-## Comparison to Lesson 03
+## Run
 
-### Lesson 03: Design Phase
-- Drew architecture diagrams
-- Defined agent responsibilities
-- Planned workflow sequences
-- Analyzed trade-offs
+This demo has no runnable code. If you were running Claude Code in this directory:
 
-### Lesson 04: Implementation Phase
-- Created actual configuration files
-- Implemented subagents as `.md` files
-- Defined skills with YAML frontmatter
-- Made design decisions executable
+```bash
+claude "Research Anthropic"
+```
 
-## Key Takeaways
+Claude would read CLAUDE.md, activate the company-analysis skill, delegate to the web-researcher and people-finder subagents, and combine their results into a structured report.
 
-1. **CLAUDE.md is your project's AI configuration** - Tells Claude about your project
-2. **Subagents handle specialized tasks** - Separate context, focused tools
-3. **Skills teach domain knowledge** - Automatically applied when relevant
-4. **Configuration is hierarchical** - Project > User > Plugin
-5. **Design translates to code** - Lesson 03 architecture → Lesson 04 config
+## What You'll See
 
-## Next Steps
+- **CLAUDE.md** -- YAML frontmatter sets project description, tools, and system instructions that apply to every conversation.
+- **Subagents** (`agents/*.md`) -- Each has its own name, description, tools, and model. Claude spawns them for focused tasks with separate context.
+- **Skill** (`skills/company-analysis/SKILL.md`) -- Teaches Claude a research methodology that it automatically applies when the user asks to research a company.
 
-In the exercise, you'll create your own `.claude` folder for the support ticket system from Lesson 03, including:
-- Your own CLAUDE.md configuration
-- At least one subagent for ticket analysis
-- At least one skill for ticket classification
+## Key Takeaway
 
-Later lessons (5-10) will show how to implement these patterns programmatically using the Claude Agent SDK.
+Configuration lives entirely in `.claude/` Markdown files. CLAUDE.md is the project-level setup, subagents handle specialized tasks with restricted tools, and skills teach domain knowledge that Claude applies automatically. This is the implementation side of the architecture you designed in Lesson 03.
