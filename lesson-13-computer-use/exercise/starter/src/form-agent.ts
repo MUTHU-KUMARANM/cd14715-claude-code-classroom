@@ -3,8 +3,6 @@
  *
  * Uses Claude's computer use capabilities to fill out a web form.
  * Demonstrates the agent loop pattern for GUI automation.
- *
- * YOUR TASK: Implement the missing parts marked with TODO
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -30,17 +28,14 @@ const DISPLAY_HEIGHT = parseInt(process.env.DISPLAY_HEIGHT || "768");
 
 /**
  * Creates the computer use tool configuration.
- *
- * TODO: (1) Return a ComputerUseTool object with:
- * - type: "computer_20250124"
- * - name: "computer"
- * - display_width_px: DISPLAY_WIDTH
- * - display_height_px: DISPLAY_HEIGHT
  */
 export function createComputerTool(): ComputerUseTool {
-  // TODO: (1) Implement this function
-  // HINT: The tool type must be exactly "computer_20250124"
-  throw new Error("TODO: Implement createComputerTool");
+  return {
+    type: "computer_20250124",
+    name: "computer",
+    display_width_px: DISPLAY_WIDTH,
+    display_height_px: DISPLAY_HEIGHT,
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -87,12 +82,6 @@ SAFETY:
 /**
  * Runs the form automation agent.
  *
- * TODO: (2) Implement the agent loop that:
- * 1. Calls Claude with the computer use tool
- * 2. Processes tool_use blocks to execute actions
- * 3. Returns screenshots as image content
- * 4. Continues until end_turn or max iterations
- *
  * @param client - Anthropic client instance
  * @param formData - Data to fill into the form
  * @param safetyConfig - Safety configuration
@@ -132,24 +121,26 @@ export async function runFormAutomationAgent(
       break;
     }
 
-    // TODO: (2a) Call Claude with computer use enabled
-    // HINT: Use client.beta.messages.create with:
-    // - model: "claude-sonnet-4-5-20250929"
-    // - max_tokens: 4096
-    // - system: systemPrompt
-    // - tools: tools (cast to Anthropic.Beta.BetaTool[])
-    // - messages: messages
-    // - betas: ["computer-use-2025-01-24"]
-    const response = null as any; // TODO: Replace with actual API call
+    // Call Claude with computer use
+    const response = await client.beta.messages.create({
+      model: "claude-sonnet-4-5-20250929",
+      max_tokens: 4096,
+      system: systemPrompt,
+      tools: tools as Anthropic.Beta.BetaTool[],
+      messages,
+      betas: ["computer-use-2025-01-24"],
+    });
 
     console.log(`Stop reason: ${response.stop_reason}`);
 
     // Process response
     const toolResults: Anthropic.ToolResultBlockParam[] = [];
+    let hasText = false;
 
     for (const block of response.content) {
       if (block.type === "text") {
         console.log(`Claude: ${block.text.substring(0, 100)}...`);
+        hasText = true;
 
         // Check if form was submitted
         if (
@@ -166,25 +157,30 @@ export async function runFormAutomationAgent(
         const result = await executeAction(action);
         actionsExecuted++;
 
-        // TODO: (2b) Format the tool result
-        // HINT: If result.screenshot exists, return it as image content:
-        // {
-        //   type: "tool_result",
-        //   tool_use_id: block.id,
-        //   content: [{
-        //     type: "image",
-        //     source: { type: "base64", media_type: "image/png", data: result.screenshot }
-        //   }]
-        // }
-        // Otherwise, return as text content:
-        // {
-        //   type: "tool_result",
-        //   tool_use_id: block.id,
-        //   content: result.output || result.error || "Action completed",
-        //   is_error: !result.success
-        // }
-
-        // TODO: Implement tool result formatting and push to toolResults
+        // Format tool result
+        if (result.screenshot) {
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: [
+              {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/png",
+                  data: result.screenshot,
+                },
+              },
+            ],
+          });
+        } else {
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: result.output || result.error || "Action completed",
+            is_error: !result.success,
+          });
+        }
       }
     }
 
@@ -194,12 +190,16 @@ export async function runFormAutomationAgent(
       break;
     }
 
-    // TODO: (2c) Add assistant response and tool results to messages
-    // HINT: Push two messages:
-    // 1. { role: "assistant", content: response.content }
-    // 2. { role: "user", content: toolResults }
+    // Add to conversation
+    messages.push({
+      role: "assistant",
+      content: response.content,
+    });
 
-    // TODO: Implement message appending
+    messages.push({
+      role: "user",
+      content: toolResults,
+    });
   }
 
   return {

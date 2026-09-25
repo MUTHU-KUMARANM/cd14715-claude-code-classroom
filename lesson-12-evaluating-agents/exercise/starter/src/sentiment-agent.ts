@@ -59,6 +59,7 @@ Provide a confidence score based on how clear the sentiment indicators are.`;
         type: "json_schema",
         schema: SentimentAnalysisJSONSchema,
       },
+      maxTurns: 10,
     },
   })) {
     // Track tool calls
@@ -74,6 +75,10 @@ Provide a confidence score based on how clear the sentiment indicators are.`;
           }
         }
       }
+    }
+
+    if (message.type === "result" && message.subtype === "error_max_turns") {
+      console.log("Hit turn limit.");
     }
 
     // Capture structured output

@@ -1,7 +1,7 @@
 /**
  * Sentiment Agent Evaluators
  *
- * TODO: Implement three evaluators to assess agent performance:
+ * Three evaluators to assess agent performance:
  * 1. Tool Call Evaluator - Did the agent call the correct tool?
  * 2. Schema Validity Evaluator - Is the output valid against the Zod schema?
  * 3. Accuracy Evaluator - Does the sentiment match the expected value?
@@ -29,7 +29,7 @@ export interface EvaluationReport {
 }
 
 // -----------------------------------------------------------------------------
-// TODO: Evaluator 1 - Tool Call Evaluator
+// Evaluator 1: Tool Call Evaluator
 // Checks if the agent called the sentiment analysis tool correctly
 // -----------------------------------------------------------------------------
 
@@ -37,48 +37,111 @@ export function evaluateToolCall(trace: AgentTrace): EvaluatorResult {
   const expectedTool = "mcp__sentiment-analyzer__analyze_sentiment";
   const toolCalls = trace.toolCalls;
 
-  // TODO: Step 1 - Check if any tool was called
+  // Check if any tool was called
+  if (toolCalls.length === 0) {
+    return {
+      name: "Tool Call Evaluator",
+      passed: false,
+      score: 0,
+      details: "No tool calls were made",
+    };
+  }
 
-  // TODO: Step 2 - Check if the correct tool was called
+  // Check if the correct tool was called
+  const correctToolCalled = toolCalls.some(call => call.name === expectedTool);
+  if (!correctToolCalled) {
+    return {
+      name: "Tool Call Evaluator",
+      passed: false,
+      score: 0.25,
+      details: `Expected tool '${expectedTool}' was not called. Called: ${toolCalls.map(c => c.name).join(", ")}`,
+    };
+  }
 
-  // TODO: Step 3 - Check if text parameter was provided
+  // Check if text parameter was provided
+  const sentimentCall = toolCalls.find(call => call.name === expectedTool);
+  const hasTextInput = sentimentCall?.input && typeof sentimentCall.input.text === "string";
 
-  // TODO: Step 4 - Return success if all checks pass
+  if (!hasTextInput) {
+    return {
+      name: "Tool Call Evaluator",
+      passed: false,
+      score: 0.5,
+      details: "Tool was called but 'text' parameter was missing or invalid",
+    };
+  }
 
   return {
     name: "Tool Call Evaluator",
-    passed: false,
-    score: 0,
-    details: "Not implemented",
+    passed: true,
+    score: 1,
+    details: `Correctly called '${expectedTool}' with text parameter`,
   };
 }
 
 // -----------------------------------------------------------------------------
-// TODO: Evaluator 2 - Schema Validity Evaluator
+// Evaluator 2: Schema Validity Evaluator
 // Checks if the output conforms to the SentimentAnalysis Zod schema
 // -----------------------------------------------------------------------------
 
 export function evaluateSchemaValidity(trace: AgentTrace): EvaluatorResult {
   const result = trace.result;
 
-  // TODO: Step 1 - Check if result exists
+  // Check if result exists
+  if (!result) {
+    return {
+      name: "Schema Validity Evaluator",
+      passed: false,
+      score: 0,
+      details: "No result was returned from the agent",
+    };
+  }
 
-  // TODO: Step 2 - Validate against Zod schema
+  // Validate against Zod schema
+  const validation = SentimentAnalysisSchema.safeParse(result);
 
-  // TODO: Step 3 - Check all required fields are valid
+  if (!validation.success) {
+    const errors = validation.error.errors.map(e => `${e.path.join(".")}: ${e.message}`);
+    return {
+      name: "Schema Validity Evaluator",
+      passed: false,
+      score: 0.5,
+      details: `Schema validation failed: ${errors.join("; ")}`,
+    };
+  }
 
-  // TODO: Step 4 - Return success if all fields valid
+  // Check all required fields are present and valid
+  const checks = [
+    { field: "text", valid: typeof result.text === "string" && result.text.length > 0 },
+    { field: "sentiment", valid: ["positive", "negative", "neutral"].includes(result.sentiment) },
+    { field: "confidence", valid: result.confidence >= 0 && result.confidence <= 1 },
+    { field: "keywords", valid: Array.isArray(result.keywords) },
+    { field: "explanation", valid: typeof result.explanation === "string" && result.explanation.length > 0 },
+  ];
+
+  const passedChecks = checks.filter(c => c.valid).length;
+  const score = passedChecks / checks.length;
+
+  if (score < 1) {
+    const failedFields = checks.filter(c => !c.valid).map(c => c.field);
+    return {
+      name: "Schema Validity Evaluator",
+      passed: false,
+      score,
+      details: `Some fields are invalid: ${failedFields.join(", ")}`,
+    };
+  }
 
   return {
     name: "Schema Validity Evaluator",
-    passed: false,
-    score: 0,
-    details: "Not implemented",
+    passed: true,
+    score: 1,
+    details: "All schema fields are valid",
   };
 }
 
 // -----------------------------------------------------------------------------
-// TODO: Evaluator 3 - Accuracy Evaluator
+// Evaluator 3: Accuracy Evaluator
 // Checks if the detected sentiment matches the expected sentiment
 // -----------------------------------------------------------------------------
 
@@ -88,18 +151,43 @@ export function evaluateAccuracy(
 ): EvaluatorResult {
   const result = trace.result;
 
-  // TODO: Step 1 - Check if result exists
-  // If !result, return failed result with score 0
+  if (!result) {
+    return {
+      name: "Accuracy Evaluator",
+      passed: false,
+      score: 0,
+      details: "No result to evaluate",
+    };
+  }
 
-  // TODO: Step 2 - Compare actual vs expected sentiment
+  const actualSentiment = result.sentiment;
+  const expectedSentiment = testCase.expectedSentiment;
 
-  // TODO: Step 3 - Return appropriate result based on match
+  if (actualSentiment === expectedSentiment) {
+    return {
+      name: "Accuracy Evaluator",
+      passed: true,
+      score: 1,
+      details: `Correctly classified as '${expectedSentiment}'`,
+    };
+  }
 
+  // Partial credit for neutral when expecting positive/negative (closer than opposite)
+  if (actualSentiment === "neutral") {
+    return {
+      name: "Accuracy Evaluator",
+      passed: false,
+      score: 0.5,
+      details: `Expected '${expectedSentiment}' but got 'neutral'`,
+    };
+  }
+
+  // No credit for opposite sentiment
   return {
     name: "Accuracy Evaluator",
     passed: false,
     score: 0,
-    details: "Not implemented",
+    details: `Expected '${expectedSentiment}' but got '${actualSentiment}'`,
   };
 }
 

@@ -1,8 +1,12 @@
 /**
- * Shopping Cart Module
+ * Shopping Cart Module - Complete Solution
  *
- * This module has INTENTIONAL GAPS for test coverage exercises.
- * Students should use TDD to identify missing functionality and tests.
+ * All gaps from the starter have been fixed:
+ * ✓ Inventory validation
+ * ✓ Proper error handling
+ * ✓ Promo code validation (expiration, limits, minimums)
+ * ✓ Currency rounding
+ * ✓ Maximum discount caps
  */
 
 import { z } from "zod";
@@ -70,6 +74,7 @@ const products = new Map<string, Product>([
   ["PROD-003", { id: "PROD-003", name: "Gadget C", price: 99.99, category: "gadgets", inStock: 25 }],
   ["PROD-004", { id: "PROD-004", name: "Premium Item", price: 199.99, category: "premium", inStock: 10 }],
   ["PROD-005", { id: "PROD-005", name: "Budget Item", price: 9.99, category: "budget", inStock: 500 }],
+  ["PROD-006", { id: "PROD-006", name: "Limited Item", price: 59.99, category: "limited", inStock: 2 }],
 ]);
 
 // Sample promo codes
@@ -77,6 +82,9 @@ const promoCodes = new Map<string, PromoCode>([
   ["SAVE10", { code: "SAVE10", type: "percentage", value: 10, minPurchase: 50, usedCount: 0 }],
   ["FLAT20", { code: "FLAT20", type: "fixed", value: 20, minPurchase: 100, usedCount: 0 }],
   ["FREESHIP", { code: "FREESHIP", type: "freeShipping", value: 0, minPurchase: 75, usedCount: 0 }],
+  ["EXPIRED", { code: "EXPIRED", type: "percentage", value: 15, minPurchase: 0, expiresAt: new Date("2020-01-01"), usedCount: 0 }],
+  ["MAXED", { code: "MAXED", type: "percentage", value: 20, minPurchase: 0, usageLimit: 5, usedCount: 5 }],
+  ["CAPPED", { code: "CAPPED", type: "percentage", value: 50, minPurchase: 0, maxDiscount: 25, usedCount: 0 }],
 ]);
 
 // =============================================================================
@@ -88,33 +96,80 @@ const SHIPPING_RATE = 5.99;
 const FREE_SHIPPING_THRESHOLD = 100;
 
 // =============================================================================
+// Utility Functions
+// =============================================================================
+
+/**
+ * Round a number to 2 decimal places (currency precision)
+ */
+function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Validate quantity is a positive integer
+ */
+function validateQuantity(quantity: number, allowZero = false): string | null {
+  if (!Number.isInteger(quantity)) {
+    return "Quantity must be an integer";
+  }
+  if (allowZero) {
+    if (quantity < 0) {
+      return "Quantity must be a non-negative integer";
+    }
+  } else {
+    if (quantity < 1) {
+      return "Quantity must be a positive integer";
+    }
+  }
+  return null;
+}
+
+/**
+ * Calculate current cart subtotal
+ */
+function getSubtotal(): number {
+  return roundCurrency(
+    cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  );
+}
+
+// =============================================================================
 // Cart Operations
 // =============================================================================
 
 /**
  * Add an item to the cart
- *
- * GAP: Inventory validation is incomplete
- * GAP: Error handling for invalid products is missing
  */
 export function addItem(productId: string, quantity: number): CartResult {
-  // TODO: Validate quantity is positive
-  // TODO: Check if product exists
-  // TODO: Check inventory availability
+  // Validate quantity
+  const quantityError = validateQuantity(quantity);
+  if (quantityError) {
+    return { success: false, error: quantityError };
+  }
 
+  // Check if product exists
   const product = products.get(productId);
-
   if (!product) {
     return { success: false, error: "Product not found" };
   }
 
-  // GAP: Should check inventory before adding
-  // if (product.inStock < quantity) { ... }
-
+  // Check current cart quantity for this product
   const existingItem = cart.find((item) => item.productId === productId);
+  const currentQuantity = existingItem ? existingItem.quantity : 0;
+  const totalQuantity = currentQuantity + quantity;
 
+  // Validate inventory
+  if (totalQuantity > product.inStock) {
+    return {
+      success: false,
+      error: `Insufficient inventory. Available: ${product.inStock}, Requested: ${totalQuantity}`,
+    };
+  }
+
+  // Add or update cart
   if (existingItem) {
-    existingItem.quantity += quantity;
+    existingItem.quantity = totalQuantity;
   } else {
     cart.push({
       productId: product.id,
@@ -129,61 +184,85 @@ export function addItem(productId: string, quantity: number): CartResult {
 
 /**
  * Remove an item from the cart
- *
- * GAP: What happens if item doesn't exist?
  */
 export function removeItem(productId: string): CartResult {
   const index = cart.findIndex((item) => item.productId === productId);
 
-  if (index === -1) {
-    // GAP: Should this be an error or success?
-    return { success: true, cart: [...cart] };
+  if (index !== -1) {
+    cart.splice(index, 1);
   }
 
-  cart.splice(index, 1);
+  // Always succeeds (idempotent operation)
   return { success: true, cart: [...cart] };
 }
 
 /**
  * Update item quantity
- *
- * GAP: Zero quantity handling
- * GAP: Inventory validation
  */
 export function updateQuantity(productId: string, quantity: number): CartResult {
-  // TODO: Handle quantity <= 0 (should remove item?)
-  // TODO: Validate against inventory
+  // Validate quantity (allow zero for removal)
+  const quantityError = validateQuantity(quantity, true);
+  if (quantityError) {
+    return { success: false, error: quantityError };
+  }
 
-  const item = cart.find((item) => item.productId === productId);
-
-  if (!item) {
+  // Find item in cart
+  const itemIndex = cart.findIndex((item) => item.productId === productId);
+  if (itemIndex === -1) {
     return { success: false, error: "Item not in cart" };
   }
 
-  // GAP: Should check inventory
-  item.quantity = quantity;
+  // If quantity is zero, remove the item
+  if (quantity === 0) {
+    cart.splice(itemIndex, 1);
+    return { success: true, cart: [...cart] };
+  }
 
+  // Check inventory
+  const product = products.get(productId);
+  if (product && quantity > product.inStock) {
+    return {
+      success: false,
+      error: `Insufficient inventory. Available: ${product.inStock}, Requested: ${quantity}`,
+    };
+  }
+
+  // Update quantity
+  cart[itemIndex].quantity = quantity;
   return { success: true, cart: [...cart] };
 }
 
 /**
  * Apply promotional code
- *
- * GAP: Expiration checking
- * GAP: Usage limit tracking
- * GAP: Minimum purchase validation
  */
 export function applyPromoCode(code: string): CartResult {
-  const promo = promoCodes.get(code.toUpperCase());
+  const normalizedCode = code.toUpperCase().trim();
+  const promo = promoCodes.get(normalizedCode);
 
   if (!promo) {
     return { success: false, error: "Invalid promo code" };
   }
 
-  // GAP: Should check expiration
-  // GAP: Should check usage limits
-  // GAP: Should check minimum purchase
+  // Check expiration
+  if (promo.expiresAt && promo.expiresAt < new Date()) {
+    return { success: false, error: "Promo code has expired" };
+  }
 
+  // Check usage limit
+  if (promo.usageLimit !== undefined && promo.usedCount >= promo.usageLimit) {
+    return { success: false, error: "Promo code usage limit reached" };
+  }
+
+  // Check minimum purchase
+  const subtotal = getSubtotal();
+  if (subtotal < promo.minPurchase) {
+    return {
+      success: false,
+      error: `Minimum purchase of $${promo.minPurchase.toFixed(2)} required`,
+    };
+  }
+
+  // Apply promo code
   appliedPromoCode = promo;
 
   return { success: true, cart: [...cart] };
@@ -199,48 +278,52 @@ export function removePromoCode(): CartResult {
 
 /**
  * Calculate cart totals
- *
- * GAP: Rounding errors in currency
- * GAP: Maximum discount cap
  */
 export function calculateTotals(): CartTotals {
   // Calculate subtotal
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = getSubtotal();
 
   // Calculate discount
   let discount = 0;
   if (appliedPromoCode) {
-    switch (appliedPromoCode.type) {
-      case "percentage":
-        discount = subtotal * (appliedPromoCode.value / 100);
-        // GAP: Should apply maxDiscount cap
-        break;
-      case "fixed":
-        discount = appliedPromoCode.value;
-        break;
-      case "freeShipping":
-        // Handled in shipping calculation
-        break;
+    // Re-validate minimum purchase (cart may have changed)
+    if (subtotal >= appliedPromoCode.minPurchase) {
+      switch (appliedPromoCode.type) {
+        case "percentage":
+          discount = subtotal * (appliedPromoCode.value / 100);
+          // Apply max discount cap if set
+          if (appliedPromoCode.maxDiscount !== undefined) {
+            discount = Math.min(discount, appliedPromoCode.maxDiscount);
+          }
+          break;
+        case "fixed":
+          discount = Math.min(appliedPromoCode.value, subtotal); // Can't discount more than subtotal
+          break;
+        case "freeShipping":
+          // Handled in shipping calculation
+          break;
+      }
     }
   }
+  discount = roundCurrency(discount);
 
-  // GAP: Potential rounding errors - should round to 2 decimal places
-  const afterDiscount = subtotal - discount;
+  // Calculate taxable amount
+  const afterDiscount = roundCurrency(subtotal - discount);
 
   // Calculate tax
-  const tax = afterDiscount * TAX_RATE;
+  const tax = roundCurrency(afterDiscount * TAX_RATE);
 
   // Calculate shipping
   let shipping = SHIPPING_RATE;
   if (subtotal >= FREE_SHIPPING_THRESHOLD) {
     shipping = 0;
   }
-  if (appliedPromoCode?.type === "freeShipping") {
+  if (appliedPromoCode?.type === "freeShipping" && subtotal >= appliedPromoCode.minPurchase) {
     shipping = 0;
   }
 
   // Calculate total
-  const total = afterDiscount + tax + shipping;
+  const total = roundCurrency(afterDiscount + tax + shipping);
 
   return {
     subtotal,
@@ -279,4 +362,18 @@ export function getProduct(productId: string): Product | undefined {
  */
 export function getAppliedPromoCode(): PromoCode | null {
   return appliedPromoCode;
+}
+
+/**
+ * Get cart item count
+ */
+export function getCartItemCount(): number {
+  return cart.reduce((sum, item) => sum + item.quantity, 0);
+}
+
+/**
+ * Check if cart is empty
+ */
+export function isCartEmpty(): boolean {
+  return cart.length === 0;
 }
