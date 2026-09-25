@@ -80,7 +80,7 @@ describe('ReportGenerator', () => {
     expect(generator.generateMarkdownReport(parsed)).toContain('src/index.ts');
     expect(generator.generateMarkdownReport(parsed)).toContain('92/100');
     expect(generator.generateHTMLReport(parsed)).toContain('Overall Score');
-    expect(generator.generateHTMLReport(parsed)).toContain('acme');
+    expect(generator.generateHTMLReport(parsed)).toContain('125ms');
   });
 });
 
