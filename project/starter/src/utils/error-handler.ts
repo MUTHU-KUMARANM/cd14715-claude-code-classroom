@@ -88,7 +88,7 @@ export async function withTimeout<T>(
   timeoutMs: number,
   errorMessage: string = 'Operation timed out'
 ): Promise<T> {
-  let timer: ReturnType<typeof setTimeout>;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       reject(new ReviewError(errorMessage, ErrorCodes.AGENT_TIMEOUT, { timeoutMs }));
@@ -98,7 +98,7 @@ export async function withTimeout<T>(
   try {
     return await Promise.race([fn(), timeoutPromise]);
   } finally {
-    clearTimeout(timer!);
+    if (timer) clearTimeout(timer);
   }
 }
 
