@@ -22,7 +22,6 @@ function ensureParsedResponse(response: Message | string): Message {
   return response;
 }
 
-/** Initialize the Anthropic client */
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -33,7 +32,7 @@ if (!model) {
 }
 
 // -----------------------------------------------------------------------------
-// Exported Types - Simple text-based output
+// Exported Types - FraudAnalysis interface
 // -----------------------------------------------------------------------------
 
 export interface FraudAnalysis {
@@ -47,28 +46,62 @@ export interface FraudAnalysis {
 // -----------------------------------------------------------------------------
 
 export async function analyzeFraudRisk(transaction: Transaction): Promise<FraudAnalysis> {
-  // TODO: Create the API call with extended thinking enabled
-  //  const rawResponse = await client.messages.create({ ... });
-  //  const response = ensureParsedResponse(rawResponse as any); // Required for Vocareum
+  const rawResponse = await client.messages.create({
+    model: model as Model,
+    max_tokens: 16000,
+    // To turn on extended thinking, add a thinking object
+    thinking: {
+      // with the type parameter set to enabled and
+      type: "enabled",
+      // the budget_tokens to a specified token budget for extended thinking.
+      // Larger budgets can improve response quality by enabling more thorough analysis for complex problems
+      // IMPORTANT: Thinking tokens are billable at the same rate as output tokens
+      // budget_tokens must be set to a value less than max_tokens
+      budget_tokens: parseInt(process.env.MAX_THINKING_TOKENS || "10000"),
+    },
+    messages: [
+      {
+        role: "user",
+        content: `You are a fraud analyst reviewing a flagged transaction.
 
-  // Use client.messages.create() with these parameters:
+                  Transaction: ${transaction.id}
+                  Amount: $${transaction.amount} at ${transaction.merchant} (${transaction.category})
+                  Location: ${transaction.location}
+                  Time: ${transaction.time}
 
-  // TODO: Build the user prompt with transaction details
-  // Include:
-  //   - Transaction: id, amount, merchant, category, location, time
-  //   - Customer History: typicalAmount, typicalLocation, accountAgeDays, previousFlags
-  //   - Ask Claude to analyze for fraud patterns and provide risk assessment
+                  Customer History:
+                  - Typical amount: $${transaction.customerHistory.typicalAmount}
+                  - Usual location: ${transaction.customerHistory.typicalLocation}
+                  - Account age: ${transaction.customerHistory.accountAgeDays} days
+                  - Previous flags: ${transaction.customerHistory.previousFlags}
 
-  // TODO: Extract thinking steps and final response from content blocks
-  // Extended thinking responses have multiple content blocks:
-  //   - "thinking" blocks contain the reasoning process
-  //   - "text" blocks contain the final response
+                  Analyze this transaction for fraud. Consider:
+                  1. Location anomalies
+                  2. Amount anomalies
+                  3. Merchant category risk
+                  4. Time of day patterns
+                  5. Account history
+
+                  Provide your assessment with a risk level (LOW/MEDIUM/HIGH/CRITICAL) and recommendation (APPROVE/REVIEW/DECLINE).`,
+      },
+    ],
+  });
+
+  // Ensure response is parsed (handles Vocareum proxy environment)
+  const response = ensureParsedResponse(rawResponse as any);
+
+  // Extract thinking steps and final response from content blocks
   const thinkingSteps: string[] = [];
   let analysis = "";
 
-  // TODO: Loop through response.content and extract blocks
+  for (const block of response.content) {
+    if (block.type === "thinking") {
+      thinkingSteps.push(block.thinking);
+    } else if (block.type === "text") {
+      analysis = block.text;
+    }
+  }
 
-  // Placeholder return - replace with actual implementation
   return {
     transactionId: transaction.id,
     analysis,

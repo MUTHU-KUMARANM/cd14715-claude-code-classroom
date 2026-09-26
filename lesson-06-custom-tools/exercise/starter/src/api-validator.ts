@@ -4,7 +4,9 @@
  * Deliverable: A custom tool that validates API responses, measures latency,
  * and checks for SLA compliance.
  *
- * Uses createSdkMcpServer and tool helper from Claude Agent SDK.
+ * ARCHITECTURE NOTE: The validateApiResponse function is exported separately
+ * from the tool handler so it can be unit tested independently of the agent.
+ * This is a best practice for tool development.
  */
 
 import { z } from "zod";
@@ -43,10 +45,14 @@ const validateApiSchema = {
 };
 
 // -----------------------------------------------------------------------------
-// Validation Logic
+// Validation Logic (exported for unit testing)
 // -----------------------------------------------------------------------------
 
-async function validateApiResponse(
+/**
+ * Validates an API response for schema compliance, performance, and SLA adherence.
+ * This function is exported so it can be unit tested independently of the agent.
+ */
+export async function validateApiResponse(
   apiUrl: URL,
   method: string,
   expectedFields: string[],
@@ -63,71 +69,70 @@ async function validateApiResponse(
   let responseData: Record<string, unknown> = {};
 
   try {
-    // TODO: Step 1 - Create fetchOptions object with:
-    //   - method: the HTTP method
-    //   - headers: merge "Content-Type": "application/json" with optional headers
-    //   - body: include body only for POST/PUT requests
+    const fetchOptions: RequestInit = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    };
 
-    // TODO: Step 2 - Make the fetch request and capture:
-    //   - response from fetch(apiUrl, fetchOptions)
-    //   - statusCode from response.status
-    //   - latencyMs = Date.now() - start
+    if (body && (method === "POST" || method === "PUT")) {
+      fetchOptions.body = body;
+    }
 
-    const latencyMs = Date.now() - start; // Remove this line after implementing Step 2
+    const response = await fetch(apiUrl, fetchOptions);
+    statusCode = response.status;
 
-    // TODO: Step 3 - Parse response JSON
-    //   - Use try/catch around response.json()
-    //   - If parsing fails, push "Response is not valid JSON" to schemaErrors
+    const latencyMs = Date.now() - start;
 
-    // TODO: Step 4 - Check for missing expected fields
-    //   - Get responseFields = Object.keys(responseData)
-    //   - For each expectedField not in responseFields:
-    //     push `Missing required field: ${field}` to breakingChanges
+    // Parse response
+    try {
+      responseData = await response.json();
+    } catch {
+      schemaErrors.push("Response is not valid JSON");
+    }
 
-    // TODO: Step 5 - Check for extra fields (potential data leakage)
-    //   - Find fields in response that are NOT in expectedFields
-    //   - If any exist, push warning: `Unexpected fields in response: ${extraFields.join(", ")}`
+    // Check expected fields
+    const responseFields = Object.keys(responseData);
+    for (const field of expectedFields) {
+      if (!responseFields.includes(field)) {
+        breakingChanges.push(`Missing required field: ${field}`);
+      }
+    }
 
-    // TODO: Step 6 - Check HTTP status code
-    //   - If statusCode < 200 or statusCode >= 300:
-    //     push `HTTP error: ${statusCode}` to schemaErrors
+    // Check for extra fields (potential data leakage)
+    const extraFields = responseFields.filter((f) => !expectedFields.includes(f));
+    if (extraFields.length > 0) {
+      warnings.push(`Unexpected fields in response: ${extraFields.join(", ")}`);
+    }
 
-    // TODO: Step 7 - Check performance against SLA
-    //   - exceedsSLA = latencyMs > maxLatencyMs
-    //   - If exceeds, push warning about response time
+    // Check status code
+    if (statusCode < 200 || statusCode >= 300) {
+      schemaErrors.push(`HTTP error: ${statusCode}`);
+    }
 
-    // TODO: Step 8 - Return ValidationResult object with all fields:
-    //   - success: true if statusCode is 2xx AND no breakingChanges
-    //   - statusCode, latencyMs
-    //   - schemaValid: true if no schemaErrors AND no breakingChanges
-    //   - schemaErrors: array or null if empty
-    //   - performanceIssues: { exceedsSLA, slaThresholdMs, actualLatencyMs }
-    //   - breakingChanges: array or null if empty
-    //   - warnings
+    // Check performance
+    const exceedsSLA = latencyMs > maxLatencyMs;
+    if (exceedsSLA) {
+      warnings.push(`Response time ${latencyMs}ms exceeds SLA of ${maxLatencyMs}ms`);
+    }
 
     return {
-      success: false,
+      success: statusCode >= 200 && statusCode < 300 && breakingChanges.length === 0,
       statusCode,
       latencyMs,
-      schemaValid: false,
-      schemaErrors: ["Not implemented"],
+      schemaValid: schemaErrors.length === 0 && breakingChanges.length === 0,
+      schemaErrors: schemaErrors.length > 0 ? schemaErrors : null,
       performanceIssues: {
-        exceedsSLA: true,
+        exceedsSLA,
         slaThresholdMs: maxLatencyMs,
         actualLatencyMs: latencyMs,
       },
-      breakingChanges: null,
-      warnings: [],
+      breakingChanges: breakingChanges.length > 0 ? breakingChanges : null,
+      warnings,
     };
   } catch (error) {
-    // TODO: Step 9 - Handle network errors
-    //   - Catch errors from fetch (network failures)
-    //   - Return ValidationResult with:
-    //     - success: false
-    //     - statusCode: 0
-    //     - schemaErrors: [`Network error: ${error.message}`]
-    //     - warnings: ["Request failed - could not reach endpoint"]
-
     const latencyMs = Date.now() - start;
     return {
       success: false,
@@ -150,26 +155,33 @@ async function validateApiResponse(
 // Create Custom Tool Server
 // -----------------------------------------------------------------------------
 
-// TODO: Step 10 - Create and export the MCP server
-//
-// Use createSdkMcpServer with:
-//   - name: "api-validator"
-//   - version: "1.0.0"
-//   - tools: array with one tool
-//
-// The tool should:
-//   - name: "validate_api_response"
-//   - description: "Validates API responses for schema compliance, performance, and SLA adherence..."
-//   - schema: validateApiSchema
-//   - handler: async function that:
-//     1. Calls validateApiResponse() with args
-//     2. Returns { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] }
-
 export const apiValidatorServer = createSdkMcpServer({
   name: "api-validator",
   version: "1.0.0",
   tools: [
-    // TODO: Add your tool here using the tool() helper
-    // tool("validate_api_response", "description", schema, handler)
+    tool(
+      "validate_api_response",
+      "Validates API responses for schema compliance, performance, and SLA adherence. Returns detailed validation report with any issues found.",
+      validateApiSchema,
+      async (args): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+        const result = await validateApiResponse(
+          new URL(args.apiUrl as string),
+          args.method,
+          args.expectedFields,
+          args.maxLatencyMs,
+          args.headers as Record<string, string>,
+          args.body
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+    ),
   ],
 });
