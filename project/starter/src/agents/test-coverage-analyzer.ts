@@ -7,7 +7,7 @@ export const testCoverageAnalyzer: AgentDefinition = {
 
   prompt: TEST_COVERAGE_ANALYZER_PROMPT,
 
-  tools: ['mcp__github__pull_request_read'],
+  tools: ['mcp__github__pull_request_read', 'Skill'],
 
   model: 'inherit',
 };

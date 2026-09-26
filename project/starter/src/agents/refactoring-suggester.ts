@@ -7,7 +7,7 @@ export const refactoringSuggester: AgentDefinition = {
 
   prompt: REFACTORING_SUGGESTER_PROMPT,
 
-  tools: ['mcp__github__pull_request_read'],
+  tools: ['mcp__github__pull_request_read', 'Skill'],
 
   model: 'inherit',
 };

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { CodeReviewOrchestrator } from '../src/orchestrator';
 import { ReviewReportSchema } from '../src/types/report-types';
-import { ReviewError, ErrorCodes, withRetry } from '../src/utils/error-handler';
+import { ReviewError, ErrorCodes, withRetry, withTimeout } from '../src/utils/error-handler';
 import { RateLimiter } from '../src/utils/rate-limiter';
+import { validateEnvironment } from '../src/config/env';
+import { createMcpServersConfig } from '../src/config/mcp.config';
 import { ReportGenerator } from '../src/utils/report-generator';
 
 const report = {
@@ -67,6 +69,10 @@ describe('ReviewReportSchema', () => {
     expect(ReviewReportSchema.safeParse({
       ...report,
       summary: { totalFiles: 1 }
+    }).success).toBe(false);
+    expect(ReviewReportSchema.safeParse({
+      ...report,
+      fileReviews: [{ ...report.fileReviews[0], codeQuality: { ...report.fileReviews[0].codeQuality, issues: [{ line: 1, severity: 'urgent', category: 'security', description: 'bad', suggestion: 'fix' }] } }]
     }).success).toBe(false);
   });
 });
@@ -133,5 +139,68 @@ describe('withRetry', () => {
 
     expect(new ReviewError('invalid', ErrorCodes.INVALID_CONFIG).code)
       .toBe(ErrorCodes.INVALID_CONFIG);
+  });
+});
+
+
+describe('withTimeout', () => {
+  it('returns the operation result before the deadline', async () => {
+    await expect(withTimeout(async () => 'done', 100)).resolves.toBe('done');
+  });
+
+  it('rejects with a typed timeout error', async () => {
+    vi.useFakeTimers();
+    try {
+      const operation = withTimeout(() => new Promise<string>(() => {}), 25, 'slow operation');
+      const assertion = expect(operation).rejects.toMatchObject({
+        name: 'ReviewError',
+        code: ErrorCodes.AGENT_TIMEOUT,
+        message: 'slow operation'
+      });
+      await vi.advanceTimersByTimeAsync(25);
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('RateLimiter sliding window', () => {
+  it('expires requests after the 60-second window', async () => {
+    vi.useFakeTimers();
+    try {
+      const limiter = new RateLimiter({ maxRequestsPerMinute: 1, maxTokensPerMinute: 100, maxConcurrent: 1 });
+      await limiter.acquire(20);
+      limiter.release();
+      expect(limiter.canProceed()).toBe(false);
+      await vi.advanceTimersByTimeAsync(60001);
+      expect(limiter.canProceed()).toBe(true);
+      expect(limiter.getStatus().requestsInWindow).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe.skip('GitHub PR integration (requires credentials and network)', () => {
+  it('reviews octocat/Hello-World#1 and produces at least one file review', async () => {
+    const result = await new CodeReviewOrchestrator().reviewPullRequest('octocat', 'Hello-World', 1);
+    expect(result.fileReviews.length).toBeGreaterThan(0);
+  });
+});
+
+
+describe('configuration', () => {
+  it('requires model, authentication, and GitHub credentials', () => {
+    expect(() => validateEnvironment({})).toThrow(/Authentication required/);
+    expect(() => validateEnvironment({ ANTHROPIC_API_KEY: 'test', ANTHROPIC_MODEL: 'test-model' })).toThrow(/GITHUB_TOKEN is required/);
+    expect(validateEnvironment({ ANTHROPIC_API_KEY: 'test', ANTHROPIC_MODEL: 'test-model', GITHUB_TOKEN: 'github-test' }).githubToken).toBe('github-test');
+  });
+
+  it('passes the validated GitHub token to the MCP server without an empty fallback', () => {
+    expect(createMcpServersConfig('github-test').github.env).toMatchObject({
+      GITHUB_PERSONAL_ACCESS_TOKEN: 'github-test'
+    });
+    expect(() => createMcpServersConfig('')).toThrow(/GITHUB_TOKEN is required/);
   });
 });

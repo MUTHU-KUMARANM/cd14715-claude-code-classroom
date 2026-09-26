@@ -4,7 +4,7 @@ import {
   ReviewReportJSONSchema,
   ReviewReportSchema
 } from './types/report-types';
-import { mcpServersConfig } from './config/mcp.config';
+import { createMcpServersConfig } from './config/mcp.config';
 import {
   codeQualityAnalyzer,
   testCoverageAnalyzer,
@@ -87,7 +87,8 @@ export class CodeReviewOrchestrator {
       testCoverageAnalyzer: {
         ...testCoverageAnalyzer,
         tools: [
-          'mcp__github__pull_request_read'
+          'mcp__github__pull_request_read',
+          'Skill'
         ]
       },
 
@@ -122,7 +123,7 @@ export class CodeReviewOrchestrator {
                     'mcp__github__pull_request_read'
                   ],
 
-                  mcpServers: mcpServersConfig,
+                  mcpServers: createMcpServersConfig(process.env.GITHUB_TOKEN ?? ''),
 
                   agents,
 

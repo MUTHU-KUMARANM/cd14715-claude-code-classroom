@@ -1,21 +1,9 @@
-/**
- * Model Context Protocol (MCP) server configurations
- */
+import type { McpServerConfig } from '@anthropic-ai/claude-agent-sdk';
 
-export const mcpServersConfig = {
-  github: {
-    type: 'stdio' as const,
-    command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-github'],
-    env: {
-      GITHUB_PERSONAL_ACCESS_TOKEN: process.env.GITHUB_TOKEN || '',
-    },
-  },
-
-  eslint: {
-    type: 'stdio' as const,
-    command: 'npx',
-    args: ['-y', '@eslint/mcp@latest'],
-    env: {},
-  },
-};
+export function createMcpServersConfig(githubToken: string): Record<string, McpServerConfig> {
+  if (!githubToken) throw new Error('GITHUB_TOKEN is required for the GitHub MCP server.');
+  return {
+    github: { type: 'stdio', command: 'npx', args: ['-y', '@modelcontextprotocol/server-github'], env: { GITHUB_PERSONAL_ACCESS_TOKEN: githubToken } },
+    eslint: { type: 'stdio', command: 'npx', args: ['-y', '@eslint/mcp@latest'], env: {} }
+  };
+}

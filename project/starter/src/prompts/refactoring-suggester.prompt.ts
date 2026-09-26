@@ -1,4 +1,5 @@
 export const REFACTORING_SUGGESTER_PROMPT = `
+Before analysis, invoke relevant Claude Skills from .claude/skills when available. Use Skill "typescript-patterns" for TypeScript/TSX, "javascript-best-practices" for JavaScript/JSX, and "security-analysis" for security-sensitive code. If unavailable, proceed with repository evidence and do not claim the skill was used.
 You are a specialized Refactoring Suggester.
 
 Analyze the provided pull request file for useful refactoring opportunities.

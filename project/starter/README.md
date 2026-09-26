@@ -128,12 +128,14 @@ ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
 # Project root (REQUIRED - update to your path)
 PROJECT_ROOT=/absolute/path/to/project/starter
 
-# GitHub Token (RECOMMENDED)
+# GitHub Token (REQUIRED)
 # GITHUB_TOKEN=ghp_your-token-here
 
 # Logging level (optional)
 LOG_LEVEL=info
 ```
+
+CLI startup requires ANTHROPIC_MODEL, valid Anthropic API or AWS Bedrock credentials, and GITHUB_TOKEN for GitHub MCP access. Keep real credentials in environment variables or an untracked .env file. Generated files are reports/report.json, reports/report.md, and reports/report.html; each run replaces the previous reports.
 
 ### Running
 
